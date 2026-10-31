@@ -5,23 +5,32 @@ const INVALID_LVL_MSG = "Invalid level input";
 
 export class ProgressManager {
 
-    // Use local storage to obtain the number of levels the user has completed
+    /**
+     * Gets the number of levels the user has completed from local storage. 
+     * 
+     * @return a number representing the number of levels the user has completed
+     */
     static getUserProgress(): number {
         const saved_string = localStorage.getItem(PROGRESS_KEY);
     
         if (saved_string !== null)
         {
             const loadedData: number = JSON.parse(saved_string);
-            console.log(loadedData);
+            return loadedData;
         }
         else {
-            console.log(0);
+            // If save data is invalid, default to no progress
             return 0;
         }
     }
 
-    // Update the number of levels the user has completed in local storage
+    /**
+     * Updates the user's progress in local storage based on a given number of levels. 
+     * 
+     * @param lvlsCompleted: a number representing the number of levels the user has completed
+     */
     static updateProgress(lvlsCompleted: number): void {
+        // Case for if number of levels entered is invalid
         if (lvlsCompleted < 0 || lvlsCompleted > NUM_LVLS)
         {
             console.log(INVALID_LVL_MSG);
@@ -30,5 +39,19 @@ export class ProgressManager {
 
         const jsonString = JSON.stringify(lvlsCompleted);
         localStorage.setItem(PROGRESS_KEY, jsonString);
+    }
+
+    /**
+     * Function which only updates progress if it is greater than current progress.
+     * Unless deleting progress, use this method instead of updateProgress to ensure
+     * progress is not lost.
+     * 
+     * @param lvlsCompleted: a number representing the number of levels the user has completed
+     */
+    static increaseProgressTo(lvlsCompleted: number): void {
+        if (lvlsCompleted > getUserProgress())
+        {
+            updateProgress(lvlsCompleted);
+        }
     }
 }
