@@ -2,11 +2,12 @@ export class HintModel{
     //what does the hint model care about? what does it need to know?
     //problem (question (number 1 (numer, denom), number 2, operation), answer)
     private incorrectAttempts = 0;
-    private problemModel: ProblemModel;
+    /*
+    private generalHint: string;
+    private specificHint: string;
+    */
 
-    constructor(problemModel: ProblemModel){
-        this.problemModel = problemModel;
-    }
+    constructor(problem: Problem){}
 
     //data from the problem generation
     //how many wrong answers there are : void
@@ -22,22 +23,31 @@ export class HintModel{
         this.incorrectAttempts = 0;
     }
 
-    //getGeneralHint : string
-    //getSpecificHint : string
+    //which hint do you need?
     generateHint(problem: Problem): string {
-        //depending on incorrect attempts 
         if(this.incorrectAttempts >= 3){
             return this.generateSpecificHint(problem);
         }
         return this.generateGeneralHint(problem);
     }
 
-    getGeneralHint(problem: Problem): string {
-        //
+    generateGeneralHint(problem: Problem): string {
+        //level 1
+
+        //level 2
+
+        //level 3
+
+        //level 4
+
+        //level 5
+
+        //level 6
+
         return "";
     }
 
-    getSpecificHint(problem: Problem): string {
+    generateSpecificHint(problem: Problem): string {
         //
         return "";
     }
