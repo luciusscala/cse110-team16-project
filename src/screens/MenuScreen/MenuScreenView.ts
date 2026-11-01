@@ -7,6 +7,7 @@ import { STAGE_WIDTH } from "../../constants.ts";
  */
 export class MenuScreenView implements View {
 	private group: Konva.Group;
+	private currentProgressText: Konva.Text;
 
 	// Note: can remove onCompleteClick from MenuScreenView's constructor once demo is done
 	constructor(onStartClick: () => void, onCompleteClick: () => void, onDeleteProgressClick: () => void, progress: number) {
