@@ -56,6 +56,15 @@ test("incorrect type of updateProgress input", () => {
     expect(storedVal).toBe(0);
 });
 
+test("updateProgress input is not a whole number", () => {
+    ProgressManager.updateProgress(1.5);
+    let storedVal = ProgressManager.getUserProgress();
+    expect(storedVal).toBe(1);
+    
+    ProgressManager.updateProgress(0);
+});
+
+
 test("increaseProgressTo stores progress correctly", () => {
     ProgressManager.increaseProgressTo(3);
     let storedVal = ProgressManager.getUserProgress();
@@ -94,4 +103,12 @@ test("incorrect type of increaseProgressTo input", () => {
     ProgressManager.updateProgress("six");
     let storedVal = ProgressManager.getUserProgress();
     expect(storedVal).toBe(0);
+});
+
+test("increaseProgressTo input is not a whole number", () => {
+    ProgressManager.increaseProgressTo(1.5);
+    let storedVal = ProgressManager.getUserProgress();
+    expect(storedVal).toBe(1);
+    
+    ProgressManager.updateProgress(0);
 });
