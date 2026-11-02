@@ -49,9 +49,9 @@ export class ProgressManager {
      * @param lvlsCompleted: a number representing the number of levels the user has completed
      */
     static increaseProgressTo(lvlsCompleted: number): void {
-        if (lvlsCompleted > getUserProgress())
+        if (lvlsCompleted > ProgressManager.getUserProgress())
         {
-            updateProgress(lvlsCompleted);
+            ProgressManager.updateProgress(lvlsCompleted);
         }
     }
 }
