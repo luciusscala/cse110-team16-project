@@ -3,7 +3,8 @@
  *
  * jsdom has no canvas implementation, so getContext("2d") returns null and Konva
  * throws as soon as it measures text. This stub stores assigned properties, gives
- * measureText an approximate width, and turns every other method into a no-op.
+ * measureText an approximate width, getImageData a blank pixel buffer, and turns
+ * every other method into a no-op.
  */
 const contexts = new WeakMap<HTMLCanvasElement, CanvasRenderingContext2D>();
 
@@ -20,6 +21,13 @@ function createStubContext(canvas: HTMLCanvasElement): CanvasRenderingContext2D 
 					const fontSize = parseFloat(String(target.font)) || 10;
 					return { width: text.length * fontSize * 0.5 };
 				};
+			}
+			if (prop === "getImageData") {
+				return (_x: number, _y: number, width: number, height: number) => ({
+					width,
+					height,
+					data: new Uint8ClampedArray(width * height * 4),
+				});
 			}
 			return () => {};
 		},
