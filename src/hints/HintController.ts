@@ -1,33 +1,38 @@
-//will probably merge with GameController
+import { ProblemModel } from "./ProblemModel.ts";
+import { HintModel } from "./HintModel.ts":
+import { HintView } from "./HintView.ts";
+
+//will probably merge with GameController when it's made though
 export class HintController{
-    //needs to have access to this information
+    
     constructor(
         private problemModel: ProblemModel,
         private hintModel: HintModel,
         private hintView: HintView,
     ){}
 
-    //decides when hints appear
-    //updates if there is another incorrect answer
+    /**
+     * Decides if hints will automatically appear when an incorrect
+     * answer is entered. 
+     */
     handleIncorrectAnswer(): void {
         this.hintModel.addIncorrectAttempt();
 
-        //auto display hint
-        if(this.hintModel.shouldShowHint()){
-            this.displayCurrentHint(hint);
+        if(this.hintModel.shouldShowSpecificHint() || 
+            this.hintModel.shouldShowGeneralHint()
+        ){
+            this.displayCurrentHint();
         }
     }
 
-    //on click
-    displayCurrentHint(problemModel: ProblemModel): void {
-        //asks ProblemModel for problem
+    /**
+     * Forwards the current hint to HintView to display.
+     */
+    displayCurrentHint(): void {
         const problem = this.problemModel.getCurrentProblem();
-
-        //passes problem to HintModel to generate hint
         const hint = this.hintModel.generateHint(problem);
-
-        //sends results to HintView
         this.hintView.displayHint(hint);
     }
+
 }
 
