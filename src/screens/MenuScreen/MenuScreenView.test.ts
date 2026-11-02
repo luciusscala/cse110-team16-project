@@ -24,7 +24,7 @@ describe("MenuScreenView", () => {
 
 	test("renders exactly three buttons in order: levels, mastery, speed", () => {
 		const view = new MenuScreenView(makeHandlers());
-		expect(view.getButtons().map((b) => b.getText())).toEqual(["LEVELS", "MASTERY", "SPEED MINIGAME"]);
+		expect(view.getButtons().map((b) => b.getText())).toEqual(["LEVELS", "MASTERY MINIGAME", "SPEED MINIGAME"]);
 		expect(view.getGroup().find(".levelsButton")).toHaveLength(1);
 		expect(view.getGroup().find(".masteryButton")).toHaveLength(1);
 		expect(view.getGroup().find(".speedButton")).toHaveLength(1);

@@ -3,7 +3,7 @@ import type { View } from "../../types.ts";
 import { STAGE_WIDTH } from "../../constants.ts";
 import { Button } from "../../components/Button.ts";
 
-const BUTTON_WIDTH = 260;
+const BUTTON_WIDTH = 300;
 const BUTTON_HEIGHT = 60;
 const BUTTON_START_Y = 260;
 const BUTTON_SPACING = 90;
@@ -41,7 +41,7 @@ export class MenuScreenView implements View {
 		const buttonX = STAGE_WIDTH / 2 - BUTTON_WIDTH / 2;
 		const buttonSpecs = [
 			{ name: "levelsButton", text: "LEVELS", onClick: handlers.onLevelsClick },
-			{ name: "masteryButton", text: "MASTERY", onClick: handlers.onMasteryClick },
+			{ name: "masteryButton", text: "MASTERY MINIGAME", onClick: handlers.onMasteryClick },
 			{ name: "speedButton", text: "SPEED MINIGAME", onClick: handlers.onSpeedClick },
 		];
 
