@@ -17,6 +17,14 @@ export class ProgressManager {
         {
             const loadedData: number = JSON.parse(saved_string);
             return loadedData;
+            /*if (typeof loadedData == number)
+            {
+                return loadedData;
+            }
+            else
+            {
+                return 0;
+            }*/
         }
         else {
             // If save data is invalid, default to no progress
@@ -31,7 +39,7 @@ export class ProgressManager {
      */
     static updateProgress(lvlsCompleted: number): void {
         // Case for if number of levels entered is invalid
-        if (lvlsCompleted < 0 || lvlsCompleted > NUM_LVLS)
+        if (lvlsCompleted < 0 || lvlsCompleted > NUM_LVLS || !Number.isFinite(lvlsCompleted))
         {
             console.log(INVALID_LVL_MSG);
             return;
@@ -49,9 +57,12 @@ export class ProgressManager {
      * @param lvlsCompleted: a number representing the number of levels the user has completed
      */
     static increaseProgressTo(lvlsCompleted: number): void {
-        if (lvlsCompleted > ProgressManager.getUserProgress())
+        if (Number.isFinite(lvlsCompleted))
         {
-            ProgressManager.updateProgress(lvlsCompleted);
+            if (lvlsCompleted > ProgressManager.getUserProgress())
+            {
+                ProgressManager.updateProgress(lvlsCompleted);
+            }
         }
     }
 }
