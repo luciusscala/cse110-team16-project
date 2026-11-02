@@ -55,6 +55,13 @@ class App implements ScreenSwitcher {
 			case "menu":
 				this.menuController.show();
 				break;
+			case "levels":
+			case "mastery":
+			case "speed":
+				// TODO: Show the matching screen once it exists; stay on the menu until then
+				console.log(`${screen.type} screen not implemented yet`);
+				this.menuController.show();
+				break;
 		}
 	}
 }
