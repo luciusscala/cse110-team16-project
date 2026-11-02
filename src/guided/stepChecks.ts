@@ -1,5 +1,10 @@
 import type { Fraction } from "../models/Fraction.ts";
-import type { ExpectedSolution, LcdError, ScaleError } from "./GuidedTypes.ts";
+import type {
+	CombineError,
+	ExpectedSolution,
+	LcdError,
+	ScaleError,
+} from "./GuidedTypes.ts";
 
 /**
  * Per-step answer checks.
@@ -53,6 +58,34 @@ export function checkScaleNumerators(
 			: "numeratorWrong";
 	}
 	return undefined;
+}
+
+/**
+ * Checks the two scaled fractions combined into one, before simplifying.
+ * The answer must keep the common denominator, so 3/6 is correct here
+ * while its simplified form 1/2 is not yet.
+ */
+export function checkCombine(
+	answer: Fraction,
+	solution: ExpectedSolution,
+): CombineError | undefined {
+	if (sameForm(answer, solution.combined)) return undefined;
+	if (answer.isEqual(solution.combined)) return "simplifiedTooEarly";
+
+	const { frac1, frac2, operation } = solution.question;
+	if (answer.denominator === frac1.denominator + frac2.denominator) {
+		return "addedDenominators";
+	}
+	if (answer.denominator !== solution.lcd) return "denominatorChanged";
+
+	const [first, second] = solution.scaled;
+	const otherOperationNumerator =
+		operation === "addition"
+			? first.numerator - second.numerator
+			: first.numerator + second.numerator;
+	return answer.numerator === otherOperationNumerator
+		? "wrongOperation"
+		: "wrongNumerator";
 }
 
 /** True when both fractions have the same top and bottom (3/6 is not 1/2). */

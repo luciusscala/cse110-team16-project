@@ -1,6 +1,6 @@
 import { describe, expect, test } from "vitest";
 import { computeExpectedSolution } from "./expectedSolution.ts";
-import { checkLcd, checkScaleNumerators } from "./stepChecks.ts";
+import { checkCombine, checkLcd, checkScaleNumerators } from "./stepChecks.ts";
 import { frac, makeQuestion } from "./testHelpers.ts";
 
 const solutionFor = (
@@ -107,5 +107,60 @@ describe("checkScaleNumerators", () => {
 		expect(
 			checkScaleNumerators([frac(3, 12), frac(1, 12)], solution),
 		).toBe("numeratorNotScaled");
+	});
+});
+
+describe("checkCombine", () => {
+	test("accepts the sum over the common denominator", () => {
+		const solution = solutionFor(frac(1, 3), "addition", frac(1, 6));
+		expect(checkCombine(frac(3, 6), solution)).toBeUndefined();
+	});
+
+	test("accepts the difference over the common denominator", () => {
+		const solution = solutionFor(frac(5, 6), "subtraction", frac(1, 3));
+		expect(checkCombine(frac(3, 6), solution)).toBeUndefined();
+	});
+
+	test("accepts the sum when the denominators already matched", () => {
+		const solution = solutionFor(frac(1, 5), "addition", frac(2, 5));
+		expect(checkCombine(frac(3, 5), solution)).toBeUndefined();
+	});
+
+	test("flags simplifying before the simplify step", () => {
+		const solution = solutionFor(frac(1, 3), "addition", frac(1, 6));
+		expect(checkCombine(frac(1, 2), solution)).toBe("simplifiedTooEarly");
+	});
+
+	test("flags adding the denominators", () => {
+		const solution = solutionFor(frac(1, 3), "addition", frac(1, 3));
+		expect(checkCombine(frac(2, 6), solution)).toBe("addedDenominators");
+	});
+
+	test("flags adding the denominators even when they differ", () => {
+		const solution = solutionFor(frac(1, 2), "addition", frac(1, 4));
+		expect(checkCombine(frac(3, 6), solution)).toBe("addedDenominators");
+	});
+
+	test("flags a denominator other than the common denominator", () => {
+		const solution = solutionFor(frac(1, 3), "addition", frac(1, 6));
+		expect(checkCombine(frac(3, 12), solution)).toBe("denominatorChanged");
+		expect(checkCombine(frac(3, 3), solution)).toBe("denominatorChanged");
+	});
+
+	test("flags subtracting on an addition question", () => {
+		// 2/6 + 1/6 would be 3/6; 2/6 - 1/6 is 1/6
+		const solution = solutionFor(frac(1, 3), "addition", frac(1, 6));
+		expect(checkCombine(frac(1, 6), solution)).toBe("wrongOperation");
+	});
+
+	test("flags adding on a subtraction question", () => {
+		// 5/6 - 2/6 is 3/6; 5/6 + 2/6 is 7/6
+		const solution = solutionFor(frac(5, 6), "subtraction", frac(1, 3));
+		expect(checkCombine(frac(7, 6), solution)).toBe("wrongOperation");
+	});
+
+	test("flags any other wrong numerator", () => {
+		const solution = solutionFor(frac(1, 3), "addition", frac(1, 6));
+		expect(checkCombine(frac(4, 6), solution)).toBe("wrongNumerator");
 	});
 });
