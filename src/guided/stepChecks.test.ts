@@ -1,6 +1,11 @@
 import { describe, expect, test } from "vitest";
 import { computeExpectedSolution } from "./expectedSolution.ts";
-import { checkCombine, checkLcd, checkScaleNumerators } from "./stepChecks.ts";
+import {
+	checkCombine,
+	checkLcd,
+	checkScaleNumerators,
+	checkSimplify,
+} from "./stepChecks.ts";
 import { frac, makeQuestion } from "./testHelpers.ts";
 
 const solutionFor = (
@@ -162,5 +167,39 @@ describe("checkCombine", () => {
 	test("flags any other wrong numerator", () => {
 		const solution = solutionFor(frac(1, 3), "addition", frac(1, 6));
 		expect(checkCombine(frac(4, 6), solution)).toBe("wrongNumerator");
+	});
+});
+
+describe("checkSimplify", () => {
+	// 1/12 + 5/12 = 6/12, which simplifies to 1/2 (halving to 3/6 is only partway)
+	const sixTwelfths = solutionFor(frac(1, 12), "addition", frac(5, 12));
+
+	test("accepts the fraction in lowest terms", () => {
+		expect(checkSimplify(frac(1, 2), sixTwelfths)).toBeUndefined();
+	});
+
+	test("flags handing back the unsimplified fraction", () => {
+		expect(checkSimplify(frac(6, 12), sixTwelfths)).toBe("notSimplified");
+	});
+
+	test("flags an equal fraction that is bigger than the combined one", () => {
+		expect(checkSimplify(frac(12, 24), sixTwelfths)).toBe("notSimplified");
+	});
+
+	test("flags simplifying only part of the way", () => {
+		expect(checkSimplify(frac(3, 6), sixTwelfths)).toBe("partlySimplified");
+	});
+
+	test("flags an answer with a different value", () => {
+		expect(checkSimplify(frac(1, 3), sixTwelfths)).toBe("changedValue");
+		expect(checkSimplify(frac(1, 4), sixTwelfths)).toBe("changedValue");
+	});
+
+	test("works for a different question", () => {
+		// 2/9 + 4/9 = 6/9 -> 2/3
+		const solution = solutionFor(frac(2, 9), "addition", frac(4, 9));
+		expect(checkSimplify(frac(2, 3), solution)).toBeUndefined();
+		expect(checkSimplify(frac(6, 9), solution)).toBe("notSimplified");
+		expect(checkSimplify(frac(2, 9), solution)).toBe("changedValue");
 	});
 });

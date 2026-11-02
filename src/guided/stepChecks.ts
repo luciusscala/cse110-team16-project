@@ -4,6 +4,7 @@ import type {
 	ExpectedSolution,
 	LcdError,
 	ScaleError,
+	SimplifyError,
 } from "./GuidedTypes.ts";
 
 /**
@@ -86,6 +87,19 @@ export function checkCombine(
 	return answer.numerator === otherOperationNumerator
 		? "wrongOperation"
 		: "wrongNumerator";
+}
+
+/** Checks the final fraction, which must be the combined fraction in lowest terms. */
+export function checkSimplify(
+	answer: Fraction,
+	solution: ExpectedSolution,
+): SimplifyError | undefined {
+	if (sameForm(answer, solution.simplified)) return undefined;
+	if (!answer.isEqual(solution.combined)) return "changedValue";
+
+	// Same amount as before, so the only question is how far it was simplified.
+	const madeNoProgress = answer.denominator >= solution.combined.denominator;
+	return madeNoProgress ? "notSimplified" : "partlySimplified";
 }
 
 /** True when both fractions have the same top and bottom (3/6 is not 1/2). */
