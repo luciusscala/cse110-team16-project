@@ -30,8 +30,11 @@ export class ProgressManager {
      * @param lvlsCompleted: a number representing the number of levels the user has completed
      */
     static updateProgress(lvlsCompleted: number): void {
+        // in case of accidental float entry, we round progress down
+        lvlsCompleted = Math.floor(lvlsCompleted);
+
         // Case for if number of levels entered is invalid
-        if (lvlsCompleted < 0 || lvlsCompleted > NUM_LVLS)
+        if (lvlsCompleted < 0 || lvlsCompleted > NUM_LVLS || !Number.isFinite(lvlsCompleted))
         {
             console.log(INVALID_LVL_MSG);
             return;
@@ -49,9 +52,13 @@ export class ProgressManager {
      * @param lvlsCompleted: a number representing the number of levels the user has completed
      */
     static increaseProgressTo(lvlsCompleted: number): void {
-        if (lvlsCompleted > ProgressManager.getUserProgress())
+        lvlsCompleted = Math.floor(lvlsCompleted);
+        if (Number.isFinite(lvlsCompleted))
         {
-            ProgressManager.updateProgress(lvlsCompleted);
+            if (lvlsCompleted > ProgressManager.getUserProgress())
+            {
+                ProgressManager.updateProgress(lvlsCompleted);
+            }
         }
     }
 }
