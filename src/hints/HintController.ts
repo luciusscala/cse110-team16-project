@@ -21,14 +21,14 @@ export class HintController{
         if(this.hintModel.shouldShowSpecificHint() || 
             this.hintModel.shouldShowGeneralHint()
         ){
-            this.displayCurrentHint();
+            this.handleHintRequest();
         }
     }
 
     /**
      * Forwards the current hint to HintView to display.
      */
-    displayCurrentHint(): void {
+    handleHintRequest(): void {
         const problem = this.problemModel.getCurrentProblem();
         const hint = this.hintModel.generateHint(problem);
         this.hintView.displayHint(hint);
