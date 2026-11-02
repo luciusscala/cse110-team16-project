@@ -66,23 +66,3 @@ export class HintView {
     }
 
 }
-
-
-
-
-//automatic hints
-//if(problem.numWrongAttempts() >= 3){
-//  hintText.text(problem.getGeneralHint());
-//  layer.draw();
-
-//}
-
-
-
-
-//does this need to export? yes hints
-
-//constructor
-//generateHint
-//loadHint
-
