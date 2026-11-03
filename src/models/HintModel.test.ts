@@ -41,9 +41,9 @@ describe("check auto display of hints from incorrect attempts", () => {
 
     test("reset incorrect attempts", () => {
         const hintModel = new HintModel();
-        hintModel.addIncorrectAttempts();
-        hintModel.addIncorrectAttempts();
-        hintModel.addIncorrectAttempts();
+        hintModel.addIncorrectAttempt();
+        hintModel.addIncorrectAttempt();
+        hintModel.addIncorrectAttempt();
         hintModel.reset();
 
         expect(hintModel.shouldShowGeneralHint()).toBe(false);
