@@ -1,4 +1,4 @@
-import { Problem } from "../Problem.ts";
+import { Problem } from "./Problem.ts";
 
 export class HintModel{
     
@@ -10,6 +10,10 @@ export class HintModel{
      */
     addIncorrectAttempt(): void {
         this.incorrectAttempts++;
+    }
+
+    getIncorrectAttempts(): number {
+        return this.incorrectAttempts;
     }
 
    /**
