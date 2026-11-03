@@ -13,12 +13,14 @@ export interface View {
  * - "levels": Campaign level select
  * - "mastery": Mastery mode
  * - "speed": Speed minigame
+ * - "guided": Step-by-step walkthrough of a guided campaign level
  */
 export type Screen =
 	| { type: "menu" }
 	| { type: "levels" }
 	| { type: "mastery" }
-	| { type: "speed" };
+	| { type: "speed" }
+	| { type: "guided"; levelId: number };
 
 export abstract class ScreenController {
 	abstract getView(): View;
