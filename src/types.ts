@@ -10,8 +10,15 @@ export interface View {
  * Screen types for navigation
  *
  * - "menu": Main menu screen
+ * - "levels": Campaign level select
+ * - "mastery": Mastery mode
+ * - "speed": Speed minigame
  */
-export type Screen = { type: "menu" };
+export type Screen =
+	| { type: "menu" }
+	| { type: "levels" }
+	| { type: "mastery" }
+	| { type: "speed" };
 
 export abstract class ScreenController {
 	abstract getView(): View;

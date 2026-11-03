@@ -1,128 +1,61 @@
 import Konva from "konva";
 import type { View } from "../../types.ts";
 import { STAGE_WIDTH } from "../../constants.ts";
+import { Button } from "../../components/Button.ts";
+
+const BUTTON_WIDTH = 300;
+const BUTTON_HEIGHT = 60;
+const BUTTON_START_Y = 260;
+const BUTTON_SPACING = 90;
+
+export interface MenuScreenHandlers {
+	onLevelsClick: () => void;
+	onMasteryClick: () => void;
+	onSpeedClick: () => void;
+}
 
 /**
  * MenuScreenView - Renders the menu screen
  */
 export class MenuScreenView implements View {
 	private group: Konva.Group;
-	private currentProgressText: Konva.Text;
+	private buttons: Button[];
 
-	// Note: can remove onCompleteClick from MenuScreenView's constructor once demo is done
-	constructor(onStartClick: () => void, onCompleteClick: () => void, onDeleteProgressClick: () => void, progress: number) {
+	constructor(handlers: MenuScreenHandlers) {
 		this.group = new Konva.Group({ visible: true });
 
-		// Title text
+		// Title text, spanning the stage width so align centers it
 		const title = new Konva.Text({
-			x: STAGE_WIDTH / 2,
+			x: 0,
 			y: 150,
+			width: STAGE_WIDTH,
 			text: "TEAM 16 GAME",
 			fontSize: 48,
 			fontFamily: "Arial",
 			fill: "black",
 			align: "center",
+			name: "title",
 		});
-		// Center the text using offsetX
-		title.offsetX(title.width() / 2);
 		this.group.add(title);
 
-		const startButtonGroup = new Konva.Group();
-		// TEMP: for testing persistence
-		const completeLvlGroup = new Konva.Group();
-		const deleteProgressGroup = new Konva.Group();
-		// end of TEMP (unless we would like a permenant deleteProgress button in the actual game)
+		const buttonX = STAGE_WIDTH / 2 - BUTTON_WIDTH / 2;
+		const buttonSpecs = [
+			{ name: "levelsButton", text: "LEVELS", onClick: handlers.onLevelsClick },
+			{ name: "masteryButton", text: "MASTERY MINIGAME", onClick: handlers.onMasteryClick },
+			{ name: "speedButton", text: "SPEED MINIGAME", onClick: handlers.onSpeedClick },
+		];
 
-		const startButton = new Konva.Rect({
-			x: STAGE_WIDTH / 2 - 100,
-			y: 300,
-			width: 200,
-			height: 60,
-			fill: "green",
-			cornerRadius: 10,
-			stroke: "darkgreen",
-			strokeWidth: 3,
-		});
-		const startText = new Konva.Text({
-			x: STAGE_WIDTH / 2,
-			y: 315,
-			text: "START GAME",
-			fontSize: 24,
-			fontFamily: "Arial",
-			fill: "white",
-			align: "center",
-		});
-
-		// Possibly temporary text which says how many levels the user has completed on the main menu
-		this.currentProgressText = new Konva.Text({
-			x: STAGE_WIDTH / 2 + 130,
-			y: 315,
-			text: `Current Level: ${progress}`,
-			fontSize: 24,
-			fontFamily: "Arial",
-			fill: "black",
-			align: "center",
-		});
-
-		//TEMP: for testing persistence
-		const completeLvl1Button = new Konva.Rect({
-			x: STAGE_WIDTH / 2 - 100,
-			y: 400,
-			width: 200,
-			height: 60,
-			fill: "green",
-			cornerRadius: 10,
-			stroke: "darkgreen",
-			strokeWidth: 3,
-		});
-		const completeLvl1Text = new Konva.Text({
-			x: STAGE_WIDTH / 2 - 80,
-			y: 415,
-			text: "Complete Lvl 1",
-			fontSize: 24,
-			fontFamily: "Arial",
-			fill: "white",
-			align: "center",
-		});
-
-		const deleteProgressButton = new Konva.Rect({
-			x: 1,
-			y: 500,
-			width: 100,
-			height: 40,
-			fill: "red",
-			cornerRadius: 10,
-			stroke: "darkred",
-			strokeWidth: 3,
-		});
-		const deleteProgressText = new Konva.Text({
-			x: 10,
-			y: 512,
-			text: "Delete data",
-			fontSize: 15,
-			fontFamily: "Arial",
-			fill: "white",
-			align: "center",
-		});
-		completeLvlGroup.add(completeLvl1Button);
-		completeLvlGroup.add(completeLvl1Text);
-		completeLvlGroup.on("click", onCompleteClick);
-
-		// These three lines may also not be temporary if we want to keep a delete progress button
-		deleteProgressGroup.add(deleteProgressButton);
-		deleteProgressGroup.add(deleteProgressText);
-		deleteProgressGroup.on("click", onDeleteProgressClick);
-
-		this.group.add(completeLvlGroup);
-		this.group.add(deleteProgressGroup);
-		// end of TEMP
-
-		startText.offsetX(startText.width() / 2);
-		startButtonGroup.add(startButton);
-		startButtonGroup.add(startText);
-		startButtonGroup.on("click", onStartClick);
-		this.group.add(startButtonGroup);
-		this.group.add(this.currentProgressText);
+		this.buttons = buttonSpecs.map(
+			(spec, i) =>
+				new Button({
+					...spec,
+					x: buttonX,
+					y: BUTTON_START_Y + i * BUTTON_SPACING,
+					width: BUTTON_WIDTH,
+					height: BUTTON_HEIGHT,
+				}),
+		);
+		this.buttons.forEach((button) => this.group.add(button.getGroup()));
 	}
 
 	/**
@@ -145,13 +78,7 @@ export class MenuScreenView implements View {
 		return this.group;
 	}
 
-	/**
-	 * Updates the shown number of levels the user has completed on the main menu.
-	 * This can be removed if we decide we do not want to display this on the main menu in the final version.
-	 * Primarily this is just here for testing purposes.
-	 */
-	updateProgressText(level: number): void {
-		this.currentProgressText.text(`Current Level: ${level}`);
-		this.group.getLayer()?.draw();
+	getButtons(): Button[] {
+		return this.buttons;
 	}
 }
