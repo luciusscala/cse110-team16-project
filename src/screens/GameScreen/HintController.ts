@@ -1,6 +1,6 @@
 import { ProblemModel } from "../../models/ProblemModel.ts";
 import { HintModel } from "../../models/HintModel.ts";
-import { HintView } from "../../models/HintView.ts";
+import { HintView } from "./HintView.ts";
 
 //will probably merge with GameController when it's made though
 export class HintController{
