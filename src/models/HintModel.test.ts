@@ -1,4 +1,4 @@
-import ( describe, expect, test ) from "vitest";
+import { describe, expect, test } from "vitest";
 import { HintModel } from "./HintModel.ts";
 import { Problem } from "./Problem.ts";
 import { Fraction } from "./Fraction.ts";
