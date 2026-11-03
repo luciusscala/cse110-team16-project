@@ -1,7 +1,10 @@
 import Konva from "konva";
 import type { ScreenSwitcher, Screen } from "./types.ts";
 import { MenuScreenController } from "./screens/MenuScreen/MenuScreenController.ts";
-import { STAGE_WIDTH, STAGE_HEIGHT } from "./constants.ts";
+import { STAGE_WIDTH, STAGE_HEIGHT, NUM_LVLS } from "./constants.ts";
+import { ProgressManager } from "./persistence/ProgressManager.ts";
+import { GuidedLevelController } from "./guided/GuidedLevelController.ts";
+import { GuidedLevelView } from "./guided/GuidedLevelView.ts";
 
 /**
  * Main Application - Coordinates all screens
@@ -15,6 +18,7 @@ class App implements ScreenSwitcher {
 	private layer: Konva.Layer;
 
 	private menuController: MenuScreenController;
+	private guidedController: GuidedLevelController;
 
 	constructor(container: string) {
 		// Initialize Konva stage (the main canvas)
@@ -30,9 +34,14 @@ class App implements ScreenSwitcher {
 
 		// Initialize all screen controllers
 		this.menuController = new MenuScreenController(this);
+		this.guidedController = new GuidedLevelController(
+			this,
+			(handlers) => new GuidedLevelView(handlers),
+		);
 
 		// Add all screen groups to the layer
 		this.layer.add(this.menuController.getView().getGroup());
+		this.layer.add(this.guidedController.getView().getGroup());
 
 		// Draw the layer (render everything to the canvas)
 		this.layer.draw();
@@ -49,6 +58,7 @@ class App implements ScreenSwitcher {
 	switchToScreen(screen: Screen): void {
 		// Hide all screens first
 		this.menuController.hide();
+		this.guidedController.hide();
 
 		// Show the requested screen based on the screen type
 		switch (screen.type) {
@@ -56,6 +66,22 @@ class App implements ScreenSwitcher {
 				this.menuController.show();
 				break;
 			case "levels":
+				// TODO: Show a level select screen. Until then, open the first
+				// level the player has not completed.
+				this.switchToScreen({
+					type: "guided",
+					levelId: Math.min(ProgressManager.getUserProgress() + 1, NUM_LVLS),
+				});
+				break;
+			case "guided":
+				if (this.guidedController.startLevel(screen.levelId)) {
+					this.guidedController.show();
+				} else {
+					// Not a guided level (yet), so stay on the menu.
+					console.log(`Level ${screen.levelId} is not available yet`);
+					this.menuController.show();
+				}
+				break;
 			case "mastery":
 			case "speed":
 				// TODO: Show the matching screen once it exists; stay on the menu until then
