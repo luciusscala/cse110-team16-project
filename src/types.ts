@@ -10,8 +10,11 @@ export interface View {
  * Screen types for navigation
  *
  * - "menu": Main menu screen
+ * - "guided": Step-by-step walkthrough of a guided campaign level
  */
-export type Screen = { type: "menu" };
+export type Screen =
+	| { type: "menu" }
+	| { type: "guided"; levelId: number };
 
 export abstract class ScreenController {
 	abstract getView(): View;
