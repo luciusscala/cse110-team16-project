@@ -22,8 +22,10 @@ const FIELD_COUNTS: Record<StepKind, number> = {
 	simplify: 2,
 };
 
-// Whole numbers only, short enough to stay exact in arithmetic.
-const WHOLE_NUMBER = /^\d{1,6}$/;
+/** Longest whole number accepted in an answer box, so arithmetic stays exact. */
+export const MAX_ANSWER_DIGITS = 6;
+
+const WHOLE_NUMBER = new RegExp(`^\\d{1,${MAX_ANSWER_DIGITS}}$`);
 
 /**
  * Turns the text from a step's answer boxes into a typed answer.
