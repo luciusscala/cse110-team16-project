@@ -2,28 +2,30 @@ import { ScreenController } from "../../types.ts";
 import type { ScreenSwitcher } from "../../types.ts";
 import { MenuScreenView } from "./MenuScreenView.ts";
 import { ProgressManager } from "../../persistence/ProgressManager.ts";
+import { NUM_LVLS } from "../../constants.ts";
 
 /**
  * MenuScreenController - Handles menu interactions
  */
 export class MenuScreenController extends ScreenController {
 	private view: MenuScreenView;
+	private screenSwitcher: ScreenSwitcher;
 
-	// TODO: Store as this.screenSwitcher once there is another screen to switch to
-	constructor(_screenSwitcher: ScreenSwitcher) {
+	constructor(screenSwitcher: ScreenSwitcher) {
 		super();
+		this.screenSwitcher = screenSwitcher;
 
 		// Note: Can remove handleCompleteLvl1Click from MenuScreenController once demo is done
 		this.view = new MenuScreenView(() => this.handleStartClick(), () => this.handleCompleteLvl1Click(), () => this.handleDeleteProgressClick(), ProgressManager.getUserProgress());
 	}
 
 	/**
-	 * Handle start button click
+	 * Handle start button click: opens the first level the player has not
+	 * completed yet (or the last level once they have finished them all).
 	 */
 	private handleStartClick(): void {
-		// TODO: Switch to the game screen once it exists:
-		// this.screenSwitcher.switchToScreen({ type: "game" });
-		console.log("Start clicked");
+		const nextLevel = Math.min(ProgressManager.getUserProgress() + 1, NUM_LVLS);
+		this.screenSwitcher.switchToScreen({ type: "guided", levelId: nextLevel });
 	}
 
 	/**
