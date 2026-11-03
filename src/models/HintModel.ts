@@ -1,4 +1,4 @@
-import { Problem } from "../Problem.ts";
+import { Problem } from "./Problem.ts";
 
 export class HintModel{
     
@@ -10,6 +10,10 @@ export class HintModel{
      */
     addIncorrectAttempt(): void {
         this.incorrectAttempts++;
+    }
+
+    getIncorrectAttempts(): number {
+        return this.incorrectAttempts;
     }
 
    /**
@@ -48,7 +52,7 @@ export class HintModel{
                 return "Remember pizza slices must be the same size in order " +
                 "to be added together. Are there any common factors that each " +
                 "pizza slice size can be multiplied by to reach the same pizza " +
-                "size? 
+                "size?";
             case 6:
                 return "Remember pizza slices must be the same size in order " +
                 "to be added together. And remember to simplify your final " +
