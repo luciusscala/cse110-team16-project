@@ -11,7 +11,15 @@ export class SpeedModeScreenController extends ScreenController {
         super();
         this.screenSwitcher = screenSwitcher;
 
-        this.view = new SpeedModeScreenView();
+        this.view = new SpeedModeScreenView({
+            onEndGameClick: () => this.handleEndGameClick(),
+        });
+    }
+
+    private handleEndGameClick(): void {
+        // This currrently returns the player to the menu screen, but should take them to the
+        // game over screen and display the appropriate information once it is implemented
+        this.screenSwitcher.switchToScreen({ type: "menu" });
     }
 
     getView(): MenuScreenView {
