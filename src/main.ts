@@ -5,6 +5,8 @@ import { STAGE_WIDTH, STAGE_HEIGHT, NUM_LVLS } from "./constants.ts";
 import { ProgressManager } from "./persistence/ProgressManager.ts";
 import { GuidedLevelController } from "./guided/GuidedLevelController.ts";
 import { GuidedLevelView } from "./guided/GuidedLevelView.ts";
+import { SpeedModeScreenController } from "./screens/SpeedModeScreen/SpeedModeScreenController.ts";
+import { SpeedModeScreenView } from "./screens/SpeedModeScreen/SpeedModeScreenView.ts";
 
 /**
  * Main Application - Coordinates all screens
@@ -19,6 +21,7 @@ class App implements ScreenSwitcher {
 
 	private menuController: MenuScreenController;
 	private guidedController: GuidedLevelController;
+	private speedModeController: SpeedModeScreenController;
 
 	constructor(container: string) {
 		// Initialize Konva stage (the main canvas)
@@ -38,10 +41,12 @@ class App implements ScreenSwitcher {
 			this,
 			(handlers) => new GuidedLevelView(handlers),
 		);
+		this.speedModeController = new SpeedModeScreenController(this);
 
 		// Add all screen groups to the layer
 		this.layer.add(this.menuController.getView().getGroup());
 		this.layer.add(this.guidedController.getView().getGroup());
+		this.layer.add(this.speedModeController.getView().getGroup());
 
 		// Draw the layer (render everything to the canvas)
 		this.layer.draw();
@@ -59,6 +64,7 @@ class App implements ScreenSwitcher {
 		// Hide all screens first
 		this.menuController.hide();
 		this.guidedController.hide();
+		this.speedModeController.hide();
 
 		// Show the requested screen based on the screen type
 		switch (screen.type) {
@@ -85,8 +91,7 @@ class App implements ScreenSwitcher {
 			case "mastery":
 			case "speed":
 				// TODO: Show the matching screen once it exists; stay on the menu until then
-				console.log(`${screen.type} screen not implemented yet`);
-				this.menuController.show();
+				this.speedModeController.show();
 				break;
 		}
 	}
