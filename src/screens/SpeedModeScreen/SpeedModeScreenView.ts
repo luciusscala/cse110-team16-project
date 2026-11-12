@@ -26,21 +26,21 @@ export class SpeedModeScreenView implements View {
         this.group = new Konva.Group({visible: true});
 
         const secondsText = new Konva.Text({
-			x: 200,
+			x: STAGE_WIDTH - 200,
 			y: 50,
-			width: STAGE_WIDTH,
+			width: 200,
 			text: "Seconds Left",
 			fontSize: 28,
 			fontFamily: "Arial",
 			fill: "black",
-			align: "center",
+			align: "left",
             name: "secondsLabel"
 		});
 
         this.remainingTimeDisplay = new Konva.Text({
-            x: 200,
+            x: STAGE_WIDTH - 210,
             y: 10,
-            width: STAGE_WIDTH,
+            width: 200,
             text: `${SPEED_MODE_TIME_LIMIT}`,
             fontSize: 32,
             fontFamily: "Arial",
@@ -50,27 +50,27 @@ export class SpeedModeScreenView implements View {
         });
 
         const scoreText = new Konva.Text({
-            x: 158,
+            x: STAGE_WIDTH - 200,
 			y: 90,
-			width: STAGE_WIDTH,
+			width: 200,
 			text: "Score:",
 			fontSize: 28,
 			fontFamily: "Arial",
 			fill: "black",
-			align: "center",
+			align: "left",
             name: "scoreLabel"
         });
 
         this.scoreDisplay = new Konva.Text({
-            x: 600,
+            x: STAGE_WIDTH - 100,
             y: 88,
-            width: STAGE_WIDTH,
+            width: 200,
             text: `0`,
             fontSize: 32,
             fontFamily: "Arial",
             fill: "green",
             align: "left",
-            name: "remainingTime"
+            name: "scoreDisplay"
         });
 
         const endButton = new Button({
@@ -80,14 +80,14 @@ export class SpeedModeScreenView implements View {
             height: 40,
             text: "End",
             onClick: handlers.onEndGameClick, 
-            name: "endGame",
+            name: "endGameButton",
             fill: "red",
             stroke: "darkred",
             textColor: "white",
         });
 
         const checkButton = new Button({
-            x: 550,
+            x: STAGE_WIDTH - 170,
             y: 400,
             width: 100,
             height: 40,

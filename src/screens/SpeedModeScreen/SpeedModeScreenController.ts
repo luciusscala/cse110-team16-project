@@ -77,7 +77,6 @@ export class SpeedModeScreenController extends ScreenController {
      * game over screen and display the appropriate information once it is implemented
      */
     private handleEndGame(): void {
-        // 
         this.endTimer();
         this.screenSwitcher.switchToScreen({ type: "menu" });
     }
@@ -95,7 +94,14 @@ export class SpeedModeScreenController extends ScreenController {
     /**
      * Returns the SpeedModeScreenView associated with this controller.
      */
-    getView(): MenuScreenView {
+    getView(): SpeedModeScreenView {
 		return this.view;
 	}
+
+    /**
+     * Returns the SpeedModeScreenModel associated with this controller.
+     */
+    getModel(): SpeedModeScreenModel {
+        return this.model;
+    } 
 }
