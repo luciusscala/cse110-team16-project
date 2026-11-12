@@ -92,6 +92,7 @@ class App implements ScreenSwitcher {
 			case "speed":
 				// TODO: Show the matching screen once it exists; stay on the menu until then
 				this.speedModeController.show();
+				this.speedModeController.startSpeedGame();
 				break;
 		}
 	}
