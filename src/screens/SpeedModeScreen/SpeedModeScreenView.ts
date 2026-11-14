@@ -4,6 +4,40 @@ import { STAGE_WIDTH } from "../../constants.ts";
 import { Button } from "../../components/Button.ts";
 import { SPEED_MODE_TIME_LIMIT } from "../../constants.ts";
 
+// General-use text constants
+const LABEL_RIGHT_ALIGN = 200;
+const SPEED_TEXT_UI_WIDTH = 200;
+const LABEL_FONTSIZE = 28;
+const NUMBER_FONTSIZE = 32;
+const LABEL_COLOR = "black";
+const SPEED_FONT = "Arial";
+const TIME_COLOR = "red";
+const SPEED_SCORE_COLOR = "green";
+
+// Timer location constants
+const TIME_RIGHT_ALIGN = 210;
+const TIME_LABEL_TOP_ALIGN = 50;
+const TIME_DISPLAY_TOP_ALIGN = 10;
+
+// Score location constants
+const SPEED_SCORE_LABEL_TOP_ALIGN = 90;
+const SPEED_SCORE_DISPLAY_RIGHT_ALIGN = 100;
+const SPEED_SCORE_DISPLAY_TOP_ALIGN = 88;
+
+// General-use button constants
+const SPEED_BUTTON_WIDTH = 100;
+const SPEED_BUTTON_HEIGHT = 40;
+const END_COLOR = "red";
+const END_OUTLINE = "darkred";
+const END_TEXT_COLOR = "white";
+
+// End button location constants
+const END_TL_CORNER_DIST = 5;
+
+// Check button location constants
+const SPEED_CHECK_RIGHT_ALIGN = 170;
+const SPEED_CHECK_TOP_ALIGN = 400;
+
 /**
  * Ensures that the appropriate handler functions are passed into SpeedModeScreenView's convstructor
  */
@@ -26,71 +60,71 @@ export class SpeedModeScreenView implements View {
         this.group = new Konva.Group({visible: true});
 
         const secondsText = new Konva.Text({
-			x: STAGE_WIDTH - 200,
-			y: 50,
-			width: 200,
+			x: STAGE_WIDTH - LABEL_RIGHT_ALIGN,
+			y: TIME_LABEL_TOP_ALIGN,
+			width: SPEED_TEXT_UI_WIDTH,
 			text: "Seconds Left",
-			fontSize: 28,
-			fontFamily: "Arial",
-			fill: "black",
+			fontSize: LABEL_FONTSIZE,
+			fontFamily: SPEED_FONT,
+			fill: LABEL_COLOR,
 			align: "left",
             name: "secondsLabel"
 		});
 
         this.remainingTimeDisplay = new Konva.Text({
-            x: STAGE_WIDTH - 210,
-            y: 10,
-            width: 200,
+            x: STAGE_WIDTH - TIME_RIGHT_ALIGN,
+            y: TIME_DISPLAY_TOP_ALIGN,
+            width: SPEED_TEXT_UI_WIDTH,
             text: `${SPEED_MODE_TIME_LIMIT}`,
-            fontSize: 32,
-            fontFamily: "Arial",
-            fill: "red",
+            fontSize: NUMBER_FONTSIZE,
+            fontFamily: SPEED_FONT,
+            fill: TIME_COLOR,
             align: "center",
             name: "remainingTime"
         });
 
         const scoreText = new Konva.Text({
-            x: STAGE_WIDTH - 200,
-			y: 90,
-			width: 200,
+            x: STAGE_WIDTH - LABEL_RIGHT_ALIGN,
+			y: SPEED_SCORE_LABEL_TOP_ALIGN,
+			width: SPEED_TEXT_UI_WIDTH,
 			text: "Score:",
-			fontSize: 28,
-			fontFamily: "Arial",
-			fill: "black",
+			fontSize: LABEL_FONTSIZE,
+			fontFamily: SPEED_FONT,
+			fill: LABEL_COLOR,
 			align: "left",
             name: "scoreLabel"
         });
 
         this.scoreDisplay = new Konva.Text({
-            x: STAGE_WIDTH - 100,
-            y: 88,
-            width: 200,
+            x: STAGE_WIDTH - SPEED_SCORE_DISPLAY_RIGHT_ALIGN,
+            y: SPEED_SCORE_DISPLAY_TOP_ALIGN,
+            width: SPEED_TEXT_UI_WIDTH,
             text: `0`,
-            fontSize: 32,
-            fontFamily: "Arial",
-            fill: "green",
+            fontSize: NUMBER_FONTSIZE,
+            fontFamily: SPEED_FONT,
+            fill: SPEED_SCORE_COLOR,
             align: "left",
             name: "scoreDisplay"
         });
 
         const endButton = new Button({
-            x: 5,
-            y: 5,
-            width: 100,
-            height: 40,
+            x: END_TL_CORNER_DIST,
+            y: END_TL_CORNER_DIST,
+            width: SPEED_BUTTON_WIDTH,
+            height: SPEED_BUTTON_HEIGHT,
             text: "End",
             onClick: handlers.onEndGameClick, 
             name: "endGameButton",
-            fill: "red",
-            stroke: "darkred",
-            textColor: "white",
+            fill: END_COLOR,
+            stroke: END_OUTLINE,
+            textColor: END_TEXT_COLOR,
         });
 
         const checkButton = new Button({
-            x: STAGE_WIDTH - 170,
-            y: 400,
-            width: 100,
-            height: 40,
+            x: STAGE_WIDTH - SPEED_CHECK_RIGHT_ALIGN,
+            y: SPEED_CHECK_TOP_ALIGN,
+            width: SPEED_BUTTON_WIDTH,
+            height: SPEED_BUTTON_HEIGHT,
             text: "Check",
             onClick: handlers.onCheckClick, 
             name: "checkButton"
