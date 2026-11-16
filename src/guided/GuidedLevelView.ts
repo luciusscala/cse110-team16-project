@@ -7,6 +7,7 @@ import type {
 	QuestionHeader,
 } from "./GuidedLevelViewPort.ts";
 import type { StepPrompt } from "./stepPrompts.ts";
+import { KeypadBuilder } from "../components/Keypad.ts";
 
 const FONT = "Arial";
 const COLORS = {
@@ -16,8 +17,6 @@ const COLORS = {
 	buttonBorder: "#1f6e36",
 	back: "#777777",
 	backBorder: "#555555",
-	pad: "#3b7dd8",
-	padBorder: "#2a5aa0",
 	boxBorder: "#999999",
 	boxActive: "#3b7dd8",
 	correct: "#1f8a3d",
@@ -113,7 +112,17 @@ export class GuidedLevelView implements GuidedLevelViewPort {
 			}),
 		);
 
-		this.buildAnswerKeys();
+		this.answerKeys = KeypadBuilder.buildAnswerKeys({
+			keySize: PAD_KEY,
+    		keySpacing: PAD_SPACING,
+    		distFromLeft: PAD_LEFT,
+    		distFromTop: PAD_TOP,
+   			actionWidth: ACTION_WIDTH,
+    		actionHeight: ACTION_HEIGHT,
+    		onKeyClick: (digit: String) => handlers.onDigit(digit),
+    		onBackspaceClick: () => handlers.onBackspace(),
+    		onCheckClick: () => handlers.onCheck(),
+		});
 		this.group.add(this.answerKeys);
 
 		this.continueButton = this.createButton({
@@ -203,55 +212,6 @@ export class GuidedLevelView implements GuidedLevelViewPort {
 	private setAnswering(answering: boolean): void {
 		this.answerKeys.visible(answering);
 		this.continueButton.visible(!answering);
-	}
-
-	private buildAnswerKeys(): void {
-		for (let digit = 0; digit <= 9; digit++) {
-			const column = digit % 5;
-			const row = Math.floor(digit / 5);
-			this.answerKeys.add(
-				this.createButton({
-					name: `digit-${digit}`,
-					x: PAD_LEFT + column * (PAD_KEY + PAD_SPACING),
-					y: PAD_TOP + row * (PAD_KEY + PAD_SPACING),
-					width: PAD_KEY,
-					height: PAD_KEY,
-					text: String(digit),
-					fill: COLORS.pad,
-					stroke: COLORS.padBorder,
-					fontSize: 26,
-					onClick: () => this.handlers.onDigit(String(digit)),
-				}),
-			);
-		}
-		this.answerKeys.add(
-			this.createButton({
-				name: "check",
-				x: ACTION_LEFT,
-				y: PAD_TOP,
-				width: ACTION_WIDTH,
-				height: ACTION_HEIGHT,
-				text: "Check",
-				fill: COLORS.button,
-				stroke: COLORS.buttonBorder,
-				fontSize: 24,
-				onClick: () => this.handlers.onCheck(),
-			}),
-		);
-		this.answerKeys.add(
-			this.createButton({
-				name: "backspace",
-				x: ACTION_LEFT,
-				y: PAD_TOP + PAD_KEY + PAD_SPACING,
-				width: ACTION_WIDTH,
-				height: ACTION_HEIGHT,
-				text: "Delete",
-				fill: COLORS.back,
-				stroke: COLORS.backBorder,
-				fontSize: 22,
-				onClick: () => this.handlers.onBackspace(),
-			}),
-		);
 	}
 
 	/** Draws each step's name, with a tick for finished steps and colour for the current one. */
