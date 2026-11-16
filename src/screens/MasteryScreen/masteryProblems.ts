@@ -14,7 +14,7 @@ const sub = (frac1: Fraction, frac2: Fraction): MasteryProblem =>
 
 export const MASTERY_PROBLEMS: readonly MasteryProblem[] = Object.freeze([
 	
-	add(f(1, 5), f(2, 5)), // 3/5
+	add(f(2, 5), f(2, 5)), // 4/5
 	add(f(2, 7), f(4, 7)), // 6/7
 	add(f(3, 11), f(5, 11)), // 8/11
 	sub(f(5, 7), f(2, 7)), // 3/7

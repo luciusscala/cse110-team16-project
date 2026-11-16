@@ -12,7 +12,6 @@ import type {
   MasterySummary,
 } from "./MasteryScreenViewPort.ts";
 
-/** Shown during the countdown so the player knows the rule before the first problem. */
 export const LOWEST_TERMS_RULE =
   "Answers must be in lowest terms.\nWrite 1/2, not 2/4.";
 
@@ -24,19 +23,8 @@ const ANSWER_FIELD_COUNT = 2;
 
 const MS_PER_SECOND = 1000;
 
-/** Where the screen is in a game. Input is only accepted while "playing". */
 type Phase = "idle" | "countdown" | "playing" | "over";
 
-/**
- * MasteryScreenController - Runs the Mastery minigame.
- *
- * A game opens with a 3, 2, 1 countdown that reminds the player to answer in
- * lowest terms. Then problems appear one at a time, with no hints. The game
- * keeps going while the player is right and ends on the first wrong answer,
- * or when the player exits. Either way, the end-game summary is shown.
- *
- * There is no game timer here. Only the Speed minigame is timed.
- */
 export class MasteryScreenController extends ScreenController {
   private readonly view: MasteryScreenViewPort;
   private readonly model: MasteryScreenModel;
@@ -83,7 +71,6 @@ export class MasteryScreenController extends ScreenController {
     this.runCountdown(MASTERY_COUNTDOWN_SECONDS);
   }
 
-  /** Stops the countdown too, so a hidden screen never starts a game by itself. */
   override hide(): void {
     this.stopCountdown();
     if (this.phase === "countdown") this.phase = "idle";
@@ -111,7 +98,6 @@ export class MasteryScreenController extends ScreenController {
     }
   }
 
-  /** Shows the current problem with empty answer boxes. */
   private showCurrentProblem(): void {
     this.entry.clear();
     this.view.showProblem(
@@ -139,10 +125,6 @@ export class MasteryScreenController extends ScreenController {
     this.refreshFields();
   }
 
-  /**
-   * Checks the answer in the boxes. Input that is not a fraction (an empty
-   * box, or 0 on the bottom) gets a message and does not count as an answer.
-   */
   private handleCheck(): void {
     if (this.phase !== "playing") return;
 

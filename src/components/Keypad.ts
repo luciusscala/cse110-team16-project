@@ -21,7 +21,7 @@ export interface keypadConfig {
     distFromTop: number;
     actionWidth: number;
     actionHeight: number;
-    onKeyClick: () => void;
+    onKeyClick: (digit: string) => void;
     onBackspaceClick: () => void;
     onCheckClick: () => void;
     keyColor?: string;

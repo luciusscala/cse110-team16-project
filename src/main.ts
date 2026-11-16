@@ -7,6 +7,7 @@ import { GuidedLevelController } from "./guided/GuidedLevelController.ts";
 import { GuidedLevelView } from "./guided/GuidedLevelView.ts";
 import { SpeedModeScreenController } from "./screens/SpeedModeScreen/SpeedModeScreenController.ts";
 import { SpeedModeScreenView } from "./screens/SpeedModeScreen/SpeedModeScreenView.ts";
+import { MasteryScreenController } from "./screens/MasteryScreen/MasteryScreenController.ts";
 
 /**
  * Main Application - Coordinates all screens
@@ -22,6 +23,7 @@ class App implements ScreenSwitcher {
 	private menuController: MenuScreenController;
 	private guidedController: GuidedLevelController;
 	private speedModeController: SpeedModeScreenController;
+	private masteryController: MasteryScreenController;
 
 	constructor(container: string) {
 		// Initialize Konva stage (the main canvas)
@@ -42,11 +44,13 @@ class App implements ScreenSwitcher {
 			(handlers) => new GuidedLevelView(handlers),
 		);
 		this.speedModeController = new SpeedModeScreenController(this);
+		this.masteryController = new MasteryScreenController(this);
 
 		// Add all screen groups to the layer
 		this.layer.add(this.menuController.getView().getGroup());
 		this.layer.add(this.guidedController.getView().getGroup());
 		this.layer.add(this.speedModeController.getView().getGroup());
+		this.layer.add(this.masteryController.getView().getGroup());
 
 		// Draw the layer (render everything to the canvas)
 		this.layer.draw();
@@ -65,6 +69,7 @@ class App implements ScreenSwitcher {
 		this.menuController.hide();
 		this.guidedController.hide();
 		this.speedModeController.hide();
+		this.masteryController.hide();
 
 		// Show the requested screen based on the screen type
 		switch (screen.type) {
@@ -89,8 +94,11 @@ class App implements ScreenSwitcher {
 				}
 				break;
 			case "mastery":
+
+				this.masteryController.show();
+				this.masteryController.startGame();
+				break;
 			case "speed":
-				// TODO: Show the matching screen once it exists; stay on the menu until then
 				this.speedModeController.show();
 				this.speedModeController.startSpeedGame();
 				break;
