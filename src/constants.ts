@@ -10,3 +10,5 @@ export const NUM_LVLS = LEVELS.length;
 
 // Minigame properties
 export const SPEED_MODE_TIME_LIMIT = 300;
+/** Seconds counted down (3, 2, 1) before a Mastery game begins. */
+export const MASTERY_COUNTDOWN_SECONDS = 3;
