@@ -29,6 +29,6 @@ export function isCorrectAnswer(
 }
 
 /** True when both fractions have the same top and bottom (3/6 is not 1/2). */
-function sameForm(a: Fraction, b: Fraction): boolean {
+export function sameForm(a: Fraction, b: Fraction): boolean {
 	return a.numerator === b.numerator && a.denominator === b.denominator;
 }

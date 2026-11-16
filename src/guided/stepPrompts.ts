@@ -32,7 +32,9 @@ const OPERATION_SYMBOLS: Record<Operation, string> = {
 };
 
 /** The question written as a sum, e.g. "1/2 + 1/4". */
-export function formatEquation(question: Question): string {
+export function formatEquation(
+	question: Pick<Question, "frac1" | "frac2" | "operation">,
+): string {
 	const symbol = OPERATION_SYMBOLS[question.operation];
 	return `${question.frac1} ${symbol} ${question.frac2}`;
 }
