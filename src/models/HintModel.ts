@@ -44,7 +44,8 @@ export class HintModel{
             case 3:
                 return "Remember pizza slices must be the same size in order " +
                 "to be added together. Try finding the Least Common Denominator " +
-                "(LCD) of 'F1' and 'F2'.";
+                "(LCD) of " + problem.getFrac1() + " and " + problem.getFrac2() + 
+                ".";
             case 4:
                 return "Can the pizza slices be combined directly? Are the " +
                 "slice sizes the same or do they need to be resized first?";
@@ -69,23 +70,27 @@ export class HintModel{
         switch(problem.getLevel()){
             case 1:
                 return "Try adding the number of pizza slices together, " + 
-                "'N1' and 'N2'. Did you remember to keep the slice size " +
-                "fixed?";
+                problem.getFrac1().getNumer() + " and " problem.getFrac2() + 
+                ". Did you remember to keep the slice size fixed?";
             case 2:
-                return "Do 'AN' and 'AD' have a common multiple that we " +
-                "can divide by?";
+                return "Do " + problem.getAnswer().getNumer() + " and " + 
+                problem.getAnswer().getDenom() + " have a common multiple that " + 
+                "we can divide by?";
             case 3:
-                return "Can 'D1' be multiplied by a number to get 'D2'? " +
+                return "Can " + problem.getFrac1().getDenom() + " be multiplied " +
+                "by a number to get " + problem.getFrac1().getDenom() + "? " +
                 "Remember to combine your final pizza portion into the " +
                 "biggest slice size possible!";
             case 4:
-                return "Try multiplying the larger pizza size by 'D2/D1' to " +
-                "make a smaller pizza slice size. Or try simplifying by dividing " +
-                "out any of the common factors both pizza slice sizes have.";
+                return "Try multiplying the larger pizza size by " + 
+                (problem.getFrac1().getDenom()/problem.getFrac2().getDenom()) + 
+                " to make a smaller pizza slice size. Or try simplifying by "
+                "dividing out any of the common factors both pizza slice sizes have.";
             case 5:
-                return "Try multiplying 'D1' and 'D2' to get the new pizza " +
-                "slice size. But remember that there could be a simpler pizza " +
-                "size that works as well.";
+                return "Try multiplying " + problem.getFrac1().getDenom() + " and " +
+                problem.getFrac2().getDenom() + " to get the new pizza slice size. " + 
+                "But remember that there could be a simpler pizza size that works as " +
+                "well.";
             case 6:
                 return "Find the Least Common Multiple (LCM) between the " +
                 "pizza slice sizes. What number is needed to get each pizza " +
@@ -103,7 +108,7 @@ export class HintModel{
     }
 
     shouldShowSpecificHint(): boolean { //auto at 5
-        return this.incorrectAttempts >= 5 && !this.specificHintShown;
+        return this.incorrectAttempts >= 5 && this.generalHintShown;
     }
 
     /**
