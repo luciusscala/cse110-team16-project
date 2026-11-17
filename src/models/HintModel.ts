@@ -1,9 +1,11 @@
 import { Problem } from "./Problem.ts";
+import { Fraction } from "./Fraction.ts";
 
 export class HintModel{
     
     private incorrectAttempts = 0;
     private generalHintShown = false;
+    private specificHintShown = false;
 
     /**
      * Increases the number of incorrect attempts made by user.
@@ -22,6 +24,7 @@ export class HintModel{
     */
     generateHint(problem: Problem): string {
         if(this.generalHintShown){ 
+            this.specificHintShown = true;
             return this.generateSpecificHint(problem);
         }
         this.generalHintShown = true;
@@ -44,7 +47,8 @@ export class HintModel{
             case 3:
                 return "Remember pizza slices must be the same size in order " +
                 "to be added together. Try finding the Least Common Denominator " +
-                "(LCD) of 'F1' and 'F2'.";
+                "(LCD) of " + problem.getFrac1() + " and " + problem.getFrac2() + 
+                ".";
             case 4:
                 return "Can the pizza slices be combined directly? Are the " +
                 "slice sizes the same or do they need to be resized first?";
@@ -58,7 +62,7 @@ export class HintModel{
                 "to be added together. And remember to simplify your final " +
                 "pizza portion into the biggest slice possible!";
             default:
-                return "No hint available.";
+                throw new Error("Invalid Level Type");
         }
     }
 
@@ -69,29 +73,33 @@ export class HintModel{
         switch(problem.getLevel()){
             case 1:
                 return "Try adding the number of pizza slices together, " + 
-                "'N1' and 'N2'. Did you remember to keep the slice size " +
-                "fixed?";
+                problem.getFrac1().numerator + " and " + problem.getFrac2().numerator + 
+                ". Did you remember to keep the slice size fixed?";
             case 2:
-                return "Do 'AN' and 'AD' have a common multiple that we " +
-                "can divide by?";
+                return "Do " + problem.getAnswer().numerator + " and " + 
+                problem.getAnswer().denominator + " have a common multiple that " + 
+                "we can divide by?";
             case 3:
-                return "Can 'D1' be multiplied by a number to get 'D2'? " +
+                return "Can " + problem.getFrac1().denominator + " be multiplied " +
+                "by a number to get " + problem.getFrac2().denominator + "? " +
                 "Remember to combine your final pizza portion into the " +
                 "biggest slice size possible!";
             case 4:
-                return "Try multiplying the larger pizza size by 'D2/D1' to " +
-                "make a smaller pizza slice size. Or try simplifying by dividing " +
-                "out any of the common factors both pizza slice sizes have.";
+                return "Try multiplying the larger pizza size by " + 
+                (problem.getFrac1().denominator/problem.getFrac2().denominator) + 
+                " to make a smaller pizza slice size. Or try simplifying by " +
+                "dividing out any of the common factors both pizza slice sizes have.";
             case 5:
-                return "Try multiplying 'D1' and 'D2' to get the new pizza " +
-                "slice size. But remember that there could be a simpler pizza " +
-                "size that works as well.";
+                return "Try multiplying " + problem.getFrac1().denominator + " and " +
+                problem.getFrac2().denominator + " to get the new pizza slice size. " + 
+                "But remember that there could be a simpler pizza size that works as " +
+                "well.";
             case 6:
                 return "Find the Least Common Multiple (LCM) between the " +
                 "pizza slice sizes. What number is needed to get each pizza " +
                 "slice size to that same shared size?";
             default:
-                return "No hint available.";
+                throw new Error("Invalid Level Type");
         }
     }
         
@@ -111,6 +119,7 @@ export class HintModel{
      */
     reset(): void {
         this.generalHintShown = false;
+        this.specificHintShown = false;
         this.incorrectAttempts = 0;
     }
 

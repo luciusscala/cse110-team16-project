@@ -61,6 +61,11 @@ export class Fraction {
 		return this.numerator * other.denominator === other.numerator * this.denominator;
 	}
 
+    /** True if fraction is larger than other fraction. */
+	isLarger(other: Fraction): boolean {
+		return this.numerator * other.denominator > other.numerator * this.denominator;
+	}
+
 	toString(): string {
 		return `${this.numerator}/${this.denominator}`;
 	}
