@@ -4,6 +4,7 @@ export class HintModel{
     
     private incorrectAttempts = 0;
     private generalHintShown = false;
+    private specificHintShown = false;
 
     /**
      * Increases the number of incorrect attempts made by user.
@@ -22,6 +23,7 @@ export class HintModel{
     */
     generateHint(problem: Problem): string {
         if(this.generalHintShown){ 
+            this.specificHintShown = true;
             return this.generateSpecificHint(problem);
         }
         this.generalHintShown = true;
@@ -108,7 +110,7 @@ export class HintModel{
     }
 
     shouldShowSpecificHint(): boolean { //auto at 5
-        return this.incorrectAttempts >= 5 && this.generalHintShown;
+        return this.incorrectAttempts >= 5 && !this.specificHintShown;
     }
 
     /**
@@ -116,6 +118,7 @@ export class HintModel{
      */
     reset(): void {
         this.generalHintShown = false;
+        this.specificHintShown = false;
         this.incorrectAttempts = 0;
     }
 

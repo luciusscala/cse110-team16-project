@@ -7,7 +7,8 @@ function createProblem(level: number): Problem {
     return new Problem(
         level, 
         new Fraction(1, 1),
-        new Fraction(1, 1)
+        new Fraction(1, 1),
+        ADDITION
     );
 }
 
