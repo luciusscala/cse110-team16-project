@@ -3,12 +3,14 @@ import { HintController } from "./HintController.ts";
 import { HintModel } from "../../models/HintModel.ts";
 import { Problem } from "../../models/Problem.ts";
 import { Fraction } from "../../models/Fraction.ts";
+import { ProblemType } from "../../models/ProblemType.ts";
 
 function createProblem(level: number): Problem {
     return new Problem(
         level, 
         new Fraction(1, 1),
-        new Fraction(1, 1)
+        new Fraction(1, 1),
+        ProblemType.ADDITION
     );
 }
 
