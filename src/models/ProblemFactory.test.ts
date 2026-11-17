@@ -2,6 +2,7 @@ import { describe, test, expect } from "vitest";
 import { Problem } from "./Problem.ts";
 import { Fraction } from "./Fraction.ts";
 import { ProblemType } from "./ProblemType.ts";
+import { ProblemFactory } from "./ProblemFactory.ts";
 
 describe("levels", () => {
     test("level 1 problem", () => {
