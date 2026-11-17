@@ -78,20 +78,20 @@ describe("FractionFoodVisual", () => {
     test("does not show division lines above 24", () => {
     const group = draw("pizza", 1, 25);
 
-    test("shows division lines when denominator is exactly 24", () => {
-    const group = draw("pizza", 12, 24);
-
-    expect(wedges(group)).toHaveLength(24);
-    expect(countFill(group, "#E7A25A")).toBe(12);
-    expect(group.find("Line")).toHaveLength(24);
-    });
-
     expect(wedges(group)).toHaveLength(1);
     expect(group.find("Line")).toHaveLength(0);
 
     const circles = group.find("Circle") as Konva.Circle[];
     expect(circles.every(circle => circle.fill() !== "#B63230"))
         .toBe(true);
+    });
+
+    test("shows division lines when denominator is exactly 24", () => {
+    const group = draw("pizza", 12, 24);
+
+    expect(wedges(group)).toHaveLength(24);
+    expect(countFill(group, "#E7A25A")).toBe(12);
+    expect(group.find("Line")).toHaveLength(24);
     });
 
     test("shows the correct portion for denominators above 36", () => {
