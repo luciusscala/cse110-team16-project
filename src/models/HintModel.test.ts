@@ -114,7 +114,7 @@ describe("check general hint level generation", () => {
 
         expect(hint).toBe("Remember pizza slices must be the same size in order " +
                 "to be added together. Try finding the Least Common Denominator " +
-                "(LCD) of 'F1' and 'F2'."); 
+                "(LCD) of 1/1 and 1/1."); 
     });
 
     test("generates a level 4 general hint", () => {
@@ -165,7 +165,7 @@ describe("check specific hint level generation", () => {
         const hint = hintModel.generateSpecificHint(problem);
 
         expect(hint).toBe("Try adding the number of pizza slices together, " + 
-                "'N1' and 'N2'. Did you remember to keep the slice size " +
+                "1 and 1. Did you remember to keep the slice size " +
                 "fixed?");
     });
 
@@ -174,7 +174,7 @@ describe("check specific hint level generation", () => {
         const hintModel = new HintModel();
         const hint = hintModel.generateSpecificHint(problem);
 
-        expect(hint).toBe("Do 'AN' and 'AD' have a common multiple that we " +
+        expect(hint).toBe("Do 1 and 1 have a common multiple that we " +
                 "can divide by?");
     });
 
@@ -183,7 +183,7 @@ describe("check specific hint level generation", () => {
         const hintModel = new HintModel();
         const hint = hintModel.generateSpecificHint(problem);
 
-        expect(hint).toBe("Can 'D1' be multiplied by a number to get 'D2'? " +
+        expect(hint).toBe("Can 1 be multiplied by a number to get 1? " +
                 "Remember to combine your final pizza portion into the " +
                 "biggest slice size possible!");
     });
@@ -193,7 +193,7 @@ describe("check specific hint level generation", () => {
         const hintModel = new HintModel();
         const hint = hintModel.generateSpecificHint(problem);
 
-        expect(hint).toBe("Try multiplying the larger pizza size by 'D2/D1' to " +
+        expect(hint).toBe("Try multiplying the larger pizza size by 1 to " +
                 "make a smaller pizza slice size. Or try simplifying by dividing " +
                 "out any of the common factors both pizza slice sizes have.");
     });
@@ -203,7 +203,7 @@ describe("check specific hint level generation", () => {
         const hintModel = new HintModel();
         const hint = hintModel.generateSpecificHint(problem);
 
-        expect(hint).toBe("Try multiplying 'D1' and 'D2' to get the new pizza " +
+        expect(hint).toBe("Try multiplying 1 and 1 to get the new pizza " +
                 "slice size. But remember that there could be a simpler pizza " +
                 "size that works as well.");
     });
@@ -218,11 +218,11 @@ describe("check specific hint level generation", () => {
                 "slice size to that same shared size?");
     });
 
-    test("generates a no level specific hint", () => {
+    test("generates invalid level specific hint", () => {
         const problem = createProblem(7);
         const hintModel = new HintModel();
         const hint = hintModel.generateSpecificHint(problem);
 
-        expect(hint).toBe("No hint available.");
+        expect(hint).toThrow("Invalid Level Type");
     });
 });

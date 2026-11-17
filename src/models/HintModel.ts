@@ -1,4 +1,5 @@
 import { Problem } from "./Problem.ts";
+import { Fraction } from "./Fraction.ts";
 
 export class HintModel{
     
