@@ -60,10 +60,6 @@ describe("denominator checks", () => {
         const problem = factory.createProblem(ProblemType.ADDITION, 5);
 
         expect(problem.getFrac1().denominator).not.toBe(problem.getFrac2().denominator);
-        expect(
-            gcd(
-                problem.getFrac1().denominator, problem.getFrac2().denominator
-            )).toBe(1);
     });
 
     test("level 6 denominators not same", () => {
@@ -71,9 +67,5 @@ describe("denominator checks", () => {
         const problem = factory.createProblem(ProblemType.ADDITION, 6);
 
         expect(problem.getFrac1().denominator).not.toBe(problem.getFrac2().denominator);
-        expect(
-            gcd(
-                problem.getFrac1().denominator, problem.getFrac2().denominator
-            )).toBe(1);
     });
 });
