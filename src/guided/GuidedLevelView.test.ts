@@ -1,7 +1,7 @@
 import Konva from "konva";
 import { beforeEach, describe, expect, test, vi } from "vitest";
 import { GuidedLevelView } from "./GuidedLevelView.ts";
-import type { GuidedLevelHandlers } from "./GuidedLevelViewPort.ts";
+import type { GuidedLevelHandlers } from "./GuidedLevelView.ts";
 import type { StepPrompt } from "./stepPrompts.ts";
 
 const FRACTION_PROMPT: StepPrompt = {

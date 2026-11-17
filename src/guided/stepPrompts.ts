@@ -1,5 +1,5 @@
 import type { Operation, Question } from "../models/level/LevelTypes.ts";
-import type { ExpectedSolution, StepKind } from "./GuidedTypes.ts";
+import type { ExpectedSolution, StepKind } from "./GuidedSolutionModel.ts";
 
 /** One thing the player types: a single number, or a fraction in two boxes. */
 export interface InputGroup {

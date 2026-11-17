@@ -1,7 +1,9 @@
 import { describe, expect, test } from "vitest";
-import { computeExpectedSolution } from "./expectedSolution.ts";
-import { parseStepAnswer } from "./answerParsing.ts";
-import type { StepKind } from "./GuidedTypes.ts";
+import {
+	computeExpectedSolution,
+	type StepKind,
+} from "./GuidedSolutionModel.ts";
+import { parseStepAnswer, STEP_FIELD_COUNTS } from "./answerParsing.ts";
 import {
 	countFields,
 	formatEquation,
@@ -107,7 +109,9 @@ describe("countFields", () => {
 
 	test("matches the number of boxes the parser expects for each step", () => {
 		for (const step of Object.keys(STEP_NAMES) as StepKind[]) {
-			const blanks = new Array<string>(countFields(getStepPrompt(step, addition))).fill("1");
+			const fromPrompt = countFields(getStepPrompt(step, addition));
+			expect(fromPrompt).toBe(STEP_FIELD_COUNTS[step]);
+			const blanks = new Array<string>(fromPrompt).fill("1");
 			expect(() => parseStepAnswer(step, blanks)).not.toThrow();
 		}
 	});

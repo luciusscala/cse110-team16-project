@@ -1,13 +1,56 @@
 import Konva from "konva";
 import { STAGE_WIDTH } from "../constants.ts";
-import type {
-	FeedbackTone,
-	GuidedLevelHandlers,
-	GuidedLevelViewPort,
-	QuestionHeader,
-} from "./GuidedLevelViewPort.ts";
-import type { StepPrompt } from "./stepPrompts.ts";
+import { Button } from "../components/Button.ts";
 import { KeypadBuilder } from "../components/Keypad.ts";
+import type { View } from "../types.ts";
+import type { StepPrompt } from "./stepPrompts.ts";
+
+/** Whether feedback is praise or a nudge to try again, so the view can style it. */
+export type FeedbackTone = "correct" | "tryAgain";
+
+/** What the screen shows about the question as a whole. */
+export interface QuestionHeader {
+	readonly levelName: string;
+	readonly questionNumber: number;
+	readonly questionCount: number;
+	/** The question written as a sum, e.g. "1/2 + 1/4". */
+	readonly equation: string;
+}
+
+/** Everything the player can do on the screen. The controller reacts to these. */
+export interface GuidedLevelHandlers {
+	onDigit(digit: string): void;
+	onBackspace(): void;
+	onFieldSelected(index: number): void;
+	onCheck(): void;
+	onContinue(): void;
+	onBack(): void;
+}
+
+/**
+ * What the controller needs from a guided level screen.
+ *
+ * The controller only talks to this interface, so it can be tested with a
+ * fake view and never depends on Konva.
+ */
+export interface GuidedLevelViewPort extends View {
+	showQuestion(header: QuestionHeader): void;
+	/** Shows a step's instruction and boxes, and where the player is in the steps. */
+	showStep(
+		prompt: StepPrompt,
+		stepNames: readonly string[],
+		currentStepIndex: number,
+	): void;
+	updateFields(fields: readonly string[], activeIndex: number): void;
+	showFeedback(message: string, tone: FeedbackTone): void;
+	/** Shows the finished question and the button to move on. */
+	showQuestionComplete(summary: string, isLastQuestion: boolean): void;
+}
+
+/** Builds the view for a controller, handing it the player's actions. */
+export type GuidedLevelViewFactory = (
+	handlers: GuidedLevelHandlers,
+) => GuidedLevelViewPort;
 
 const FONT = "Arial";
 const COLORS = {
@@ -51,19 +94,6 @@ const ACTION_LEFT = 470;
 const ACTION_WIDTH = 230;
 const ACTION_HEIGHT = 46;
 
-interface ButtonConfig {
-	name: string;
-	x: number;
-	y: number;
-	width: number;
-	height: number;
-	text: string;
-	fill: string;
-	stroke: string;
-	fontSize: number;
-	onClick: () => void;
-}
-
 interface AnswerBox {
 	readonly rect: Konva.Rect;
 	readonly text: Konva.Text;
@@ -84,7 +114,7 @@ export class GuidedLevelView implements GuidedLevelViewPort {
 	private readonly equationText: Konva.Text;
 	private readonly feedbackText: Konva.Text;
 	private readonly stepContent = new Konva.Group();
-	private readonly answerKeys = new Konva.Group();
+	private readonly answerKeys: Konva.Group;
 	private readonly continueButton: Konva.Group;
 	private readonly continueLabel: Konva.Text;
 	private boxes: AnswerBox[] = [];
@@ -98,7 +128,7 @@ export class GuidedLevelView implements GuidedLevelViewPort {
 
 		this.group.add(this.stepContent);
 		this.group.add(
-			this.createButton({
+			new Button({
 				name: "back",
 				x: 12,
 				y: 10,
@@ -109,23 +139,23 @@ export class GuidedLevelView implements GuidedLevelViewPort {
 				stroke: COLORS.backBorder,
 				fontSize: 18,
 				onClick: () => this.handlers.onBack(),
-			}),
+			}).getGroup(),
 		);
 
 		this.answerKeys = KeypadBuilder.buildAnswerKeys({
 			keySize: PAD_KEY,
-    		keySpacing: PAD_SPACING,
-    		distFromLeft: PAD_LEFT,
-    		distFromTop: PAD_TOP,
-   			actionWidth: ACTION_WIDTH,
-    		actionHeight: ACTION_HEIGHT,
-    		onKeyClick: (digit: String) => handlers.onDigit(digit),
-    		onBackspaceClick: () => handlers.onBackspace(),
-    		onCheckClick: () => handlers.onCheck(),
+			keySpacing: PAD_SPACING,
+			distFromLeft: PAD_LEFT,
+			distFromTop: PAD_TOP,
+			actionWidth: ACTION_WIDTH,
+			actionHeight: ACTION_HEIGHT,
+			onKeyClick: (digit: string) => handlers.onDigit(digit),
+			onBackspaceClick: () => handlers.onBackspace(),
+			onCheckClick: () => handlers.onCheck(),
 		});
 		this.group.add(this.answerKeys);
 
-		this.continueButton = this.createButton({
+		this.continueButton = new Button({
 			name: "continue",
 			x: ACTION_LEFT,
 			y: PAD_TOP,
@@ -136,7 +166,7 @@ export class GuidedLevelView implements GuidedLevelViewPort {
 			stroke: COLORS.buttonBorder,
 			fontSize: 22,
 			onClick: () => this.handlers.onContinue(),
-		});
+		}).getGroup();
 		this.continueLabel = this.continueButton.findOne<Konva.Text>("Text")!;
 		this.continueButton.visible(false);
 		this.group.add(this.continueButton);
@@ -392,43 +422,6 @@ export class GuidedLevelView implements GuidedLevelViewPort {
 		});
 		this.group.add(node);
 		return node;
-	}
-
-	private createButton(config: ButtonConfig): Konva.Group {
-		const button = new Konva.Group({ x: config.x, y: config.y, name: config.name });
-		button.add(
-			new Konva.Rect({
-				width: config.width,
-				height: config.height,
-				fill: config.fill,
-				stroke: config.stroke,
-				strokeWidth: 3,
-				cornerRadius: 10,
-			}),
-		);
-		// The label spans the whole button so it can be centered without measuring.
-		button.add(
-			new Konva.Text({
-				width: config.width,
-				height: config.height,
-				text: config.text,
-				fontSize: config.fontSize,
-				fontFamily: FONT,
-				fill: "white",
-				align: "center",
-				verticalAlign: "middle",
-				listening: false,
-			}),
-		);
-		button.on("click tap", config.onClick);
-		button.on("mouseenter", () => this.setCursor(button, "pointer"));
-		button.on("mouseleave", () => this.setCursor(button, "default"));
-		return button;
-	}
-
-	private setCursor(node: Konva.Node, cursor: string): void {
-		const container = node.getStage()?.container();
-		if (container) container.style.cursor = cursor;
 	}
 
 	private redraw(): void {

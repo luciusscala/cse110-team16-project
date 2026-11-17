@@ -1,6 +1,8 @@
 import { describe, expect, test } from "vitest";
-import { GuidedSolutionModel } from "./GuidedSolutionModel.ts";
-import { computeExpectedSolution } from "./expectedSolution.ts";
+import {
+	GuidedSolutionModel,
+	computeExpectedSolution,
+} from "./GuidedSolutionModel.ts";
 import { getStepPrompt } from "./stepPrompts.ts";
 import { getAllLevels, getLevelById } from "../models/level/levelRepository.ts";
 import type { Question } from "../models/level/LevelTypes.ts";

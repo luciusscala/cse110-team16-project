@@ -1,5 +1,5 @@
 import type { Fraction } from "../models/Fraction.ts";
-import type { ExpectedSolution, StepAnswer } from "./GuidedTypes.ts";
+import type { ExpectedSolution, StepAnswer } from "./GuidedSolutionModel.ts";
 
 /**
  * Whether an answer is the correct one for its step.
