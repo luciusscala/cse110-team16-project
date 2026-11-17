@@ -70,7 +70,7 @@ export class HintModel{
         switch(problem.getLevel()){
             case 1:
                 return "Try adding the number of pizza slices together, " + 
-                problem.getFrac1().getNumer() + " and " problem.getFrac2() + 
+                problem.getFrac1().getNumer() + " and " + problem.getFrac2() + 
                 ". Did you remember to keep the slice size fixed?";
             case 2:
                 return "Do " + problem.getAnswer().getNumer() + " and " + 
