@@ -1,6 +1,6 @@
 import { describe, test, expect } from "vitest";
 import { Problem } from "./Problem.ts";
-import { Fraction } from "./Fraction.ts";
+import { Fraction, gcd } from "./Fraction.ts";
 import { ProblemType } from "./ProblemType.ts";
 import { ProblemFactory } from "./ProblemFactory.ts";
 
@@ -59,7 +59,7 @@ describe("denominator checks", () => {
         const factory = new ProblemFactory();
         const problem = factory.createProblem(ProblemType.ADDITION, 5);
 
-        expect(problem.getFrac1().denominator).not.toBe(getFrac2().denominator);
+        expect(problem.getFrac1().denominator).not.toBe(problem.getFrac2().denominator);
         expect(
             gcd(
                 problem.getFrac1().denominator, problem.getFrac2().denominator
@@ -70,7 +70,7 @@ describe("denominator checks", () => {
         const factory = new ProblemFactory();
         const problem = factory.createProblem(ProblemType.ADDITION, 6);
 
-        expect(problem.getFrac1().denominator).not.toBe(getFrac2().denominator);
+        expect(problem.getFrac1().denominator).not.toBe(problem.getFrac2().denominator);
         expect(
             gcd(
                 problem.getFrac1().denominator, problem.getFrac2().denominator
