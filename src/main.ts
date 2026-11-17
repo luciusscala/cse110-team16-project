@@ -109,7 +109,7 @@ class App implements ScreenSwitcher {
 				this.speedModeController.startSpeedGame();
 				break;
 			case "gameOver":
-    			this.gameOverController.showResults(screen.gameId, screen.score);
+    			this.gameOverController.showResults(screen.gameId, screen.score, screen.summary);
     			this.gameOverController.show();
     			break;
 		}

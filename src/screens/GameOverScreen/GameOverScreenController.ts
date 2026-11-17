@@ -3,6 +3,7 @@ import type { ScreenSwitcher } from "../../types.ts";
 import { HighScoreModel } from "../../models/HighScoreModel.ts";
 import type { MinigameId } from "../../models/HighScoreModel.ts";
 import { GameOverScreenView } from "./GameOverScreenView.ts";
+import type { MasterySummary } from "../MasteryScreen/MasteryScreenViewPort.ts";
 
 export class GameOverScreenController extends ScreenController {
     private readonly highScores = new HighScoreModel();
@@ -23,7 +24,7 @@ export class GameOverScreenController extends ScreenController {
     }
 
     /** Called once when a minigame ends. */
-    showResults(gameId: MinigameId, score: number): void {
+    showResults(gameId: MinigameId, score: number, summary?: MasterySummary): void {
         this.currentMode = gameId;
         const leaderboard = this.highScores.recordScore(score, gameId);
         
@@ -32,6 +33,7 @@ export class GameOverScreenController extends ScreenController {
             score,
             this.highScores.getHighScore(gameId),
             leaderboard,
+            summary,
         );
     }
 

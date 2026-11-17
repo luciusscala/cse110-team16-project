@@ -3,6 +3,7 @@ import { Button } from "../../components/Button.ts";
 import { STAGE_WIDTH, STAGE_HEIGHT } from "../../constants.ts";
 import type { View } from "../../types.ts";
 import type { MinigameId, ScoreEntry } from "../../models/HighScoreModel.ts";
+import type { MasterySummary } from "../MasteryScreen/MasteryScreenViewPort.ts";
 
 export interface GameOverHandlers {
     onPlayAgain(): void;
@@ -15,6 +16,7 @@ export class GameOverScreenView implements View {
     private readonly scoreText: Konva.Text;
     private readonly bestText: Konva.Text;
     private readonly leaderboardText: Konva.Text;
+    private readonly summaryText: Konva.Text;
 
     constructor(handlers: GameOverHandlers) {
         const center = STAGE_WIDTH / 2;
@@ -29,7 +31,11 @@ export class GameOverScreenView implements View {
         const leaderboardTitle = makeText("Top 5 scores", 215, 26);
         this.leaderboardText = makeText("No previous scores", 257, 22);
         this.leaderboardText.lineHeight(1.6);
-        this.group.add(this.title, this.scoreText, this.bestText, leaderboardTitle, this.leaderboardText);
+        this.summaryText = makeText("", 450, 18);
+        this.summaryText.width(650);
+        this.summaryText.x((STAGE_WIDTH - 650) / 2);
+
+        this.group.add(this.title, this.scoreText, this.bestText, leaderboardTitle, this.leaderboardText, this.summaryText);
 
         const buttonY = STAGE_HEIGHT - 100;
         this.group.add(new Button({
@@ -42,14 +48,19 @@ export class GameOverScreenView implements View {
         }).getGroup());
     }
 
-    showResults(gameId: MinigameId, score: number, personalBest: number, leaderboard: readonly ScoreEntry[]): void {
+    showResults(gameId: MinigameId, score: number, personalBest: number, leaderboard: readonly ScoreEntry[], summary?: MasterySummary): void {
         this.title.text(gameId === "speedMode" ? "Speed Mode Complete!" : "Mastery Mode Complete!");
         this.scoreText.text(`Your score: ${score}`);
         this.bestText.text(`Personal best: ${personalBest}`);
         this.leaderboardText.text(leaderboard.length === 0
             ? "No scores yet"
             : leaderboard.map((entry, i) => `${i + 1}.  ${entry.score}`).join("\n"));
-        this.group.getLayer()?.batchDraw();
+        this.summaryText.text(
+            summary ? `Correct: ${summary.correctCount}   Incorrect: ${summary.incorrectCount}\n${summary.detail}`
+            : ""
+        );
+        
+            this.group.getLayer()?.batchDraw();
     }
 
     show(): void { this.group.visible(true); this.group.getLayer()?.batchDraw(); }

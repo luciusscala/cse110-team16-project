@@ -1,5 +1,6 @@
 import type { Group } from "konva/lib/Group";
 import type { MinigameId } from "./models/HighScoreModel.ts";
+import type { MasterySummary } from "./screens/MasteryScreen/MasteryScreenViewPort.ts";
 
 export interface View {
 	getGroup(): Group;
@@ -22,7 +23,11 @@ export type Screen =
     | { type: "mastery" }
     | { type: "speed" }
     | { type: "guided"; levelId: number }
-    | { type: "gameOver"; gameId: MinigameId; score: number };
+	| { type: "gameOver";
+    	gameId: MinigameId;
+    	score: number;
+    	summary?: MasterySummary;
+	  };
 
 export abstract class ScreenController {
 	abstract getView(): View;
