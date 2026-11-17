@@ -73,25 +73,25 @@ export class HintModel{
         switch(problem.getLevel()){
             case 1:
                 return "Try adding the number of pizza slices together, " + 
-                problem.getFrac1().getNumer() + " and " + problem.getFrac2().getNumer() + 
+                problem.getFrac1().numerator + " and " + problem.getFrac2().numerator + 
                 ". Did you remember to keep the slice size fixed?";
             case 2:
-                return "Do " + problem.getAnswer().getNumer() + " and " + 
-                problem.getAnswer().getDenom() + " have a common multiple that " + 
+                return "Do " + problem.getAnswer().numerator + " and " + 
+                problem.getAnswer().denominator + " have a common multiple that " + 
                 "we can divide by?";
             case 3:
-                return "Can " + problem.getFrac1().getDenom() + " be multiplied " +
-                "by a number to get " + problem.getFrac1().getDenom() + "? " +
+                return "Can " + problem.getFrac1().denominator + " be multiplied " +
+                "by a number to get " + problem.getFrac1().denominator + "? " +
                 "Remember to combine your final pizza portion into the " +
                 "biggest slice size possible!";
             case 4:
                 return "Try multiplying the larger pizza size by " + 
-                (problem.getFrac1().getDenom()/problem.getFrac2().getDenom()) + 
+                (problem.getFrac1().denominator/problem.getFrac2().denominator) + 
                 " to make a smaller pizza slice size. Or try simplifying by "
                 "dividing out any of the common factors both pizza slice sizes have.";
             case 5:
-                return "Try multiplying " + problem.getFrac1().getDenom() + " and " +
-                problem.getFrac2().getDenom() + " to get the new pizza slice size. " + 
+                return "Try multiplying " + problem.getFrac1().denominator + " and " +
+                problem.getFrac2().denominator + " to get the new pizza slice size. " + 
                 "But remember that there could be a simpler pizza size that works as " +
                 "well.";
             case 6:

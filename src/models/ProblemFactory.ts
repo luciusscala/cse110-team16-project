@@ -42,7 +42,7 @@ export class ProblemFactory {
         const denominator = this.getRandomInt(6, 15);
         const multiplier1 = this.getRandomInt(1, 3);
         const multiplier2 = this.getRandomInt(2, 5);
-        const fraction1 = new Fraction(this.getRandomInt(1, denominator - 1), 
+        const fraction1 = new Fraction(this.getRandomInt(1, denominator - 1)), 
                             (denominator * multiplier1);
         const fraction2 = new Fraction(this.getRandomInt(1, denominator - 1), 
                             (denominator * multipler2));
