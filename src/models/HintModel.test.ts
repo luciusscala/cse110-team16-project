@@ -2,13 +2,14 @@ import { describe, expect, test } from "vitest";
 import { HintModel } from "./HintModel.ts";
 import { Problem } from "./Problem.ts";
 import { Fraction } from "./Fraction.ts";
+import { ProblemType } from "./ProblemType.ts";
 
 function createProblem(level: number): Problem {
     return new Problem(
         level, 
         new Fraction(1, 1),
         new Fraction(1, 1),
-        ADDITION
+        ProblemType.ADDITION
     );
 }
 
