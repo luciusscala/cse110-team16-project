@@ -25,7 +25,7 @@ describe("SpeedModeScreenController", () => {
         expect(spy).toHaveBeenCalled();
 
         expect(switcher.switchToScreen).toHaveBeenCalledTimes(1);
-		expect(switcher.switchToScreen).toHaveBeenCalledWith({ type: "menu" });
+		expect(switcher.switchToScreen).toHaveBeenCalledWith({ type: "gameOver", gameId: "speedMode", score: 0 });
     });
 
     // change this test once actual checks are implemented
