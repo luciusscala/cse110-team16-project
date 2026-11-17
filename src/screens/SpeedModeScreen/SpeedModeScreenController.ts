@@ -22,7 +22,9 @@ export class SpeedModeScreenController extends ScreenController {
 
         this.view = new SpeedModeScreenView({
             onEndGameClick: () => this.handleEndGame(),
-            onCheckClick: () => this.handleCheckClick()
+            onKeyClick: (digit) => this.handleKeyClick(digit),
+            onCheckClick: () => this.handleCheckClick(),
+            onBackspaceClick: () => this.handleBackspaceClick(),
         });
         this.model = new SpeedModeScreenModel();
     }
@@ -79,6 +81,14 @@ export class SpeedModeScreenController extends ScreenController {
     private handleEndGame(): void {
         this.endTimer();
         this.screenSwitcher.switchToScreen({ type: "menu" });
+    }
+
+    private handleKeyClick(digit: String): void {
+        console.log(`Clicked digit ${digit}`);
+    }
+
+    private handleBackspaceClick(): void {
+        console.log(`Clicked backspace`);
     }
 
     /**
