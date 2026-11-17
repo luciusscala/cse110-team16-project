@@ -68,6 +68,10 @@ const PROBLEMS: MasteryProblem[] = [
 	{ frac1: f(2, 3), frac2: f(1, 6), operation: "subtraction" },
 ];
 
+function fromList(problems: MasteryProblem[]) {
+	return (difficulty: number) => problems[difficulty % problems.length];
+}
+
 function setup() {
 	const switcher: ScreenSwitcher = { switchToScreen: vi.fn() };
 	let view!: FakeView;
@@ -79,7 +83,7 @@ function setup() {
 			view = new FakeView();
 			return view;
 		},
-		new MasteryScreenModel(PROBLEMS),
+		new MasteryScreenModel(fromList(PROBLEMS)),
 	);
 	return { controller, switcher, view, handlers };
 }

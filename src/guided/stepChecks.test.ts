@@ -1,6 +1,8 @@
 import { describe, expect, test } from "vitest";
-import { computeExpectedSolution } from "./expectedSolution.ts";
-import type { StepAnswer } from "./GuidedTypes.ts";
+import {
+	computeExpectedSolution,
+	type StepAnswer,
+} from "./GuidedSolutionModel.ts";
 import { isCorrectAnswer } from "./stepChecks.ts";
 import { frac, makeQuestion } from "./testHelpers.ts";
 

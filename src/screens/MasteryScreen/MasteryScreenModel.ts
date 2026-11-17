@@ -1,9 +1,14 @@
 import type { Fraction } from "../../models/Fraction.ts";
 import { sameForm } from "../../guided/stepChecks.ts";
-import { MASTERY_PROBLEMS, masteryAnswer } from "./masteryProblems.ts";
-import type { MasteryProblem } from "./masteryProblems.ts";
+import {
+	generateMasteryProblem,
+	masteryAnswer,
+	type MasteryProblem,
+} from "./masteryProblems.ts";
 
 export type MasteryEndReason = "wrongAnswer" | "exited";
+
+export type MasteryProblemGenerator = (difficulty: number) => MasteryProblem;
 
 export interface MissedProblem {
   readonly problem: MasteryProblem;
@@ -12,30 +17,36 @@ export interface MissedProblem {
 }
 
 export class MasteryScreenModel {
-  private readonly problems: readonly MasteryProblem[];
-  private index = 0;
+  private readonly generate: MasteryProblemGenerator;
+  private difficulty = 0;
+  private current: MasteryProblem;
   private correctCount = 0;
   private incorrectCount = 0;
   private endReason: MasteryEndReason | undefined;
   private missed: MissedProblem | undefined;
 
-  constructor(problems: readonly MasteryProblem[] = MASTERY_PROBLEMS) {
-    if (problems.length === 0) {
-      throw new Error("Mastery needs at least one problem");
-    }
-    this.problems = problems;
+  constructor(
+    generate: MasteryProblemGenerator = generateMasteryProblem,
+  ) {
+    this.generate = generate;
+    this.current = this.generate(0);
   }
 
   reset(): void {
-    this.index = 0;
+    this.difficulty = 0;
     this.correctCount = 0;
     this.incorrectCount = 0;
     this.endReason = undefined;
     this.missed = undefined;
+    this.current = this.generate(0);
   }
 
   getCurrentProblem(): MasteryProblem {
-    return this.problems[this.index];
+    return this.current;
+  }
+
+  getDifficulty(): number {
+    return this.difficulty;
   }
 
   getCorrectCount(): number {
@@ -71,7 +82,8 @@ export class MasteryScreenModel {
     const expected = masteryAnswer(problem);
     if (sameForm(answer, expected)) {
       this.correctCount++;
-      this.index = (this.index + 1) % this.problems.length;
+      this.difficulty++;
+      this.current = this.generate(this.difficulty);
       return true;
     }
 

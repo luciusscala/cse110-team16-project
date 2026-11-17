@@ -1,17 +1,16 @@
 import { ProgressManager } from "../persistence/ProgressManager.ts";
+import { CurrentLevelProgressModel } from "../models/CurrentLevelProgressModel.ts";
 import { getLevelById } from "../models/level/levelRepository.ts";
 import type { Level } from "../models/level/LevelTypes.ts";
 import { ScreenController } from "../types.ts";
 import type { ScreenSwitcher } from "../types.ts";
 import { AnswerEntryModel } from "./AnswerEntryModel.ts";
 import { parseStepAnswer } from "./answerParsing.ts";
-import { computeExpectedSolution } from "./expectedSolution.ts";
 import { GuidedSolutionModel } from "./GuidedSolutionModel.ts";
-import type { ExpectedSolution } from "./GuidedTypes.ts";
 import type {
 	GuidedLevelViewFactory,
 	GuidedLevelViewPort,
-} from "./GuidedLevelViewPort.ts";
+} from "./GuidedLevelView.ts";
 import {
 	countFields,
 	formatEquation,
@@ -24,7 +23,6 @@ const TRY_AGAIN_MESSAGE = "Not quite. Read the tip and try again!";
 
 /** The question the player is working on, with everything that goes with it. */
 interface ActiveQuestion {
-	readonly solution: ExpectedSolution;
 	readonly model: GuidedSolutionModel;
 	entry: AnswerEntryModel;
 }
@@ -43,7 +41,7 @@ export class GuidedLevelController extends ScreenController {
 	private readonly screenSwitcher: ScreenSwitcher;
 
 	private level: Level | undefined;
-	private questionIndex = 0;
+	private levelProgress: CurrentLevelProgressModel | undefined;
 	private active: ActiveQuestion | undefined;
 	private questionComplete = false;
 
@@ -75,26 +73,27 @@ export class GuidedLevelController extends ScreenController {
 		if (level === undefined || !level.guided) return false;
 
 		this.level = level;
-		this.questionIndex = 0;
+		this.levelProgress = new CurrentLevelProgressModel(level.questions.length);
 		this.loadQuestion();
 		return true;
 	}
 
 	private loadQuestion(): void {
 		const level = this.requireLevel();
-		const question = level.questions[this.questionIndex];
+		const progress = this.requireLevelProgress();
+		const question = level.questions[progress.getProblemsCompleted()];
 
 		this.questionComplete = false;
+		const model = new GuidedSolutionModel(question);
 		this.active = {
-			solution: computeExpectedSolution(question),
-			model: new GuidedSolutionModel(question),
-			entry: new AnswerEntryModel(1),
+			model,
+			entry: this.makeEntry(model),
 		};
 
 		this.view.showQuestion({
 			levelName: level.displayName,
-			questionNumber: this.questionIndex + 1,
-			questionCount: level.questions.length,
+			questionNumber: progress.getProblemsCompleted() + 1,
+			questionCount: progress.getTotalProblems(),
 			equation: formatEquation(question),
 		});
 		this.showCurrentStep();
@@ -106,9 +105,15 @@ export class GuidedLevelController extends ScreenController {
 		const step = active.model.getCurrentStep();
 		if (step === undefined) return;
 
-		const prompt = getStepPrompt(step, active.solution);
+		const prompt = getStepPrompt(step, active.model.getSolution());
+		const fieldCount = countFields(prompt);
 		const steps = active.model.getSteps();
-		active.entry = new AnswerEntryModel(countFields(prompt));
+
+		if (active.entry.getFields().length === fieldCount) {
+			active.entry.clear();
+		} else {
+			active.entry = new AnswerEntryModel(fieldCount);
+		}
 
 		this.view.showStep(
 			prompt,
@@ -116,6 +121,17 @@ export class GuidedLevelController extends ScreenController {
 			steps.indexOf(step),
 		);
 		this.refreshFields();
+	}
+
+	/** Builds an empty entry sized for the model's current step. */
+	private makeEntry(model: GuidedSolutionModel): AnswerEntryModel {
+		const step = model.getCurrentStep();
+		if (step === undefined) {
+			throw new Error("Cannot build answer boxes for a completed question");
+		}
+		return new AnswerEntryModel(
+			countFields(getStepPrompt(step, model.getSolution())),
+		);
 	}
 
 	private refreshFields(): void {
@@ -169,14 +185,14 @@ export class GuidedLevelController extends ScreenController {
 	}
 
 	private finishQuestion(): void {
-		const { solution, model } = this.requireActive();
-		const level = this.requireLevel();
+		const { model } = this.requireActive();
+		const progress = this.requireLevelProgress();
 		this.questionComplete = true;
 
 		const finalAnswer = model.getFinalAnswer();
 		this.view.showQuestionComplete(
-			`${formatEquation(solution.question)} = ${finalAnswer}`,
-			this.questionIndex === level.questions.length - 1,
+			`${formatEquation(model.getQuestion())} = ${finalAnswer}`,
+			progress.getProblemsCompleted() === progress.getTotalProblems() - 1,
 		);
 	}
 
@@ -184,9 +200,10 @@ export class GuidedLevelController extends ScreenController {
 	private handleContinue(): void {
 		if (!this.questionComplete) return;
 		const level = this.requireLevel();
+		const progress = this.requireLevelProgress();
 
-		if (this.questionIndex < level.questions.length - 1) {
-			this.questionIndex++;
+		progress.completeProblem();
+		if (!progress.isLevelComplete()) {
 			this.loadQuestion();
 			return;
 		}
@@ -201,6 +218,7 @@ export class GuidedLevelController extends ScreenController {
 
 	private leaveLevel(): void {
 		this.level = undefined;
+		this.levelProgress = undefined;
 		this.active = undefined;
 		this.questionComplete = false;
 		this.screenSwitcher.switchToScreen({ type: "menu" });
@@ -214,6 +232,13 @@ export class GuidedLevelController extends ScreenController {
 	private requireLevel(): Level {
 		if (this.level === undefined) throw new Error("No level has been started");
 		return this.level;
+	}
+
+	private requireLevelProgress(): CurrentLevelProgressModel {
+		if (this.levelProgress === undefined) {
+			throw new Error("No level has been started");
+		}
+		return this.levelProgress;
 	}
 
 	private requireActive(): ActiveQuestion {

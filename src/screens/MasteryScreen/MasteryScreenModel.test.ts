@@ -5,30 +5,36 @@ import type { MasteryProblem } from "./masteryProblems.ts";
 
 const f = (n: number, d: number) => new Fraction(n, d);
 
-
 const PROBLEMS: MasteryProblem[] = [
 	{ frac1: f(1, 4), frac2: f(1, 4), operation: "addition" },
 	{ frac1: f(2, 3), frac2: f(1, 6), operation: "subtraction" },
 	{ frac1: f(1, 5), frac2: f(1, 5), operation: "addition" },
 ];
 
+/** Maps difficulty → fixture so tests stay deterministic. */
+function fromList(problems: MasteryProblem[]) {
+	return (difficulty: number) => problems[difficulty % problems.length];
+}
+
 function makeModel() {
-	return new MasteryScreenModel(PROBLEMS);
+	return new MasteryScreenModel(fromList(PROBLEMS));
 }
 
 describe("MasteryScreenModel", () => {
 	test("starts on the first problem with no answers", () => {
 		const model = makeModel();
 		expect(model.getCurrentProblem()).toBe(PROBLEMS[0]);
+		expect(model.getDifficulty()).toBe(0);
 		expect(model.getCorrectCount()).toBe(0);
 		expect(model.getIncorrectCount()).toBe(0);
 		expect(model.isOver()).toBe(false);
 	});
 
-	test("a correct answer scores a point and moves to the next problem", () => {
+	test("a correct answer scores a point and raises difficulty", () => {
 		const model = makeModel();
 		expect(model.submit(f(1, 2))).toBe(true);
 		expect(model.getCorrectCount()).toBe(1);
+		expect(model.getDifficulty()).toBe(1);
 		expect(model.getCurrentProblem()).toBe(PROBLEMS[1]);
 		expect(model.isOver()).toBe(false);
 	});
@@ -62,13 +68,14 @@ describe("MasteryScreenModel", () => {
 		expect(() => model.submit(f(1, 2))).toThrow();
 	});
 
-	test("goes back to the first problem after the last one", () => {
+	test("keeps generating after many correct answers", () => {
 		const model = makeModel();
 		model.submit(f(1, 2));
 		model.submit(f(1, 2));
 		model.submit(f(2, 5));
 		expect(model.getCurrentProblem()).toBe(PROBLEMS[0]);
 		expect(model.getCorrectCount()).toBe(3);
+		expect(model.getDifficulty()).toBe(3);
 		expect(model.isOver()).toBe(false);
 	});
 
@@ -89,19 +96,16 @@ describe("MasteryScreenModel", () => {
 		expect(model.getEndReason()).toBe("wrongAnswer");
 	});
 
-	test("reset starts a fresh game", () => {
+	test("reset starts a fresh game at difficulty 0", () => {
 		const model = makeModel();
 		model.submit(f(1, 2));
 		model.submit(f(1, 3));
 		model.reset();
 		expect(model.getCurrentProblem()).toBe(PROBLEMS[0]);
+		expect(model.getDifficulty()).toBe(0);
 		expect(model.getCorrectCount()).toBe(0);
 		expect(model.getIncorrectCount()).toBe(0);
 		expect(model.isOver()).toBe(false);
 		expect(model.getMissedProblem()).toBeUndefined();
-	});
-
-	test("needs at least one problem", () => {
-		expect(() => new MasteryScreenModel([])).toThrow();
 	});
 });

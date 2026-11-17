@@ -1,5 +1,5 @@
 import { Fraction } from "../models/Fraction.ts";
-import type { StepAnswer, StepKind } from "./GuidedTypes.ts";
+import type { StepAnswer, StepKind } from "./GuidedSolutionModel.ts";
 
 /** Why the text in the answer boxes could not be turned into an answer. */
 export type InvalidInput = "notWholeNumber" | "zeroDenominator" | "notPositive";
@@ -14,8 +14,11 @@ const INVALID_INPUT_MESSAGES: Record<InvalidInput, string> = {
 	notPositive: "The slice size has to be bigger than 0.",
 };
 
-/** How many answer boxes each step shows, in the order they are passed in. */
-const FIELD_COUNTS: Record<StepKind, number> = {
+/**
+ * How many answer boxes each step shows, in the order they are passed in.
+ * Must stay aligned with the inputs from `getStepPrompt` / `countFields`.
+ */
+export const STEP_FIELD_COUNTS: Record<StepKind, number> = {
 	lcd: 1,
 	scaleNumerators: 4, // top and bottom of the first fraction, then of the second
 	combine: 2,
@@ -38,9 +41,9 @@ export function parseStepAnswer(
 	step: StepKind,
 	fields: readonly string[],
 ): ParseResult {
-	if (fields.length !== FIELD_COUNTS[step]) {
+	if (fields.length !== STEP_FIELD_COUNTS[step]) {
 		throw new Error(
-			`Step "${step}" takes ${FIELD_COUNTS[step]} boxes, got ${fields.length}`,
+			`Step "${step}" takes ${STEP_FIELD_COUNTS[step]} boxes, got ${fields.length}`,
 		);
 	}
 
