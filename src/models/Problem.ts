@@ -38,7 +38,7 @@ export class Problem {
      */
     computeAnswer(): Fraction{
         if(this.operator === ProblemType.ADDITION){
-            return this.fraction1.add(this.fraction2);
+            return this.fraction1.add(this.fraction2).simplify();;
         }
         else if(this.operator === ProblemType.SUBTRACTION){
             if(this.fraction1.isLarger(this.fraction2)){
@@ -46,7 +46,9 @@ export class Problem {
             }
             return this.fraction2.subtract(this.fraction1).simplify();
         }
-        throw new Error("Invalid Operator Type");
+        else{
+            throw new Error("Invalid Operator Type");
+        }
     }
 
     /**

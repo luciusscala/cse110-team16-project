@@ -27,26 +27,26 @@ export class ProblemFactory {
      * Creates problems of level 1-2 in which the fractions have
      * the same denominators.
      */
-    createLevel1Problem(type: ProblemType, level: number): Problem {
+    createLevel2Problem(type: ProblemType): Problem {
         const denominator = this.getRandomInt(6, 15);
         const fraction1 = new Fraction(this.getRandomInt(1, denominator - 1), denominator);
         const fraction2 = new Fraction(this.getRandomInt(1, denominator - 1), denominator);
-        return new Problem(1, fraction1, fraction2, type);
+        return new Problem(2, fraction1, fraction2, type);
     }
 
     /**
      * Creates problems of level 3-4 in which the fractions have
      * denominators which are multiples.
      */
-    createLevel3Problem(type: ProblemType, level: number): Problem {
+    createLevel4Problem(type: ProblemType): Problem {
         const denominator = this.getRandomInt(6, 15);
         const multiplier1 = this.getRandomInt(1, 3);
         const multiplier2 = this.getRandomInt(2, 5);
         const fraction1 = new Fraction(this.getRandomInt(1, denominator - 1)), 
                             (denominator * multiplier1);
         const fraction2 = new Fraction(this.getRandomInt(1, denominator - 1), 
-                            (denominator * multipler2));
-        return new Problem(1, fraction1, fraction2, type);
+                            (denominator * multiplier2));
+        return new Problem(4, fraction1, fraction2, type);
     }
 
     /**
@@ -54,12 +54,12 @@ export class ProblemFactory {
      * denominators where you need to find the LCD but have lower
      * denominators. 
      */
-    createLevel5Problem(type: ProblemType, level: number): Problem {
+    createLevel5Problem(type: ProblemType): Problem {
         const denominator1 = this.getRandomInt(6, 15);
         const denominator2 = this.getRandomInt(6, 15);
         const fraction1 = new Fraction(this.getRandomInt(1, denominator1 - 1), denominator1);
-        const fraction2 = new Fraction(this.getRandomInt(1, denominator1 - 1), denominator2);
-        return new Problem(1, fraction1, fraction2, type);
+        const fraction2 = new Fraction(this.getRandomInt(1, denominator2 - 1), denominator2);
+        return new Problem(5, fraction1, fraction2, type);
     }
 
     /**
@@ -67,12 +67,12 @@ export class ProblemFactory {
      * denominators where you need to find the LCD but have higher
      * denominators. 
      */
-    createLevel6Problem(type: ProblemType, level: number): Problem {
+    createLevel6Problem(type: ProblemType): Problem {
         const denominator1 = this.getRandomInt(15, 30);
         const denominator2 = this.getRandomInt(15, 30);
         const fraction1 = new Fraction(this.getRandomInt(5, denominator1 - 1), denominator1);
-        const fraction2 = new Fraction(this.getRandomInt(5, denominator1 - 1), denominator2);
-        return new Problem(1, fraction1, fraction2, type);
+        const fraction2 = new Fraction(this.getRandomInt(5, denominator2 - 1), denominator2);
+        return new Problem(6, fraction1, fraction2, type);
     }
 
     /**

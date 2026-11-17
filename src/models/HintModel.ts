@@ -87,7 +87,7 @@ export class HintModel{
             case 4:
                 return "Try multiplying the larger pizza size by " + 
                 (problem.getFrac1().denominator/problem.getFrac2().denominator) + 
-                " to make a smaller pizza slice size. Or try simplifying by "
+                " to make a smaller pizza slice size. Or try simplifying by " +
                 "dividing out any of the common factors both pizza slice sizes have.";
             case 5:
                 return "Try multiplying " + problem.getFrac1().denominator + " and " +

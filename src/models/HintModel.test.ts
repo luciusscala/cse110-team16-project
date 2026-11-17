@@ -147,12 +147,12 @@ describe("check general hint level generation", () => {
                 "pizza portion into the biggest slice possible!");
     });
 
-    test("generates a no level general hint", () => {
+    test("generates an invalid level general hint", () => {
         const problem = createProblem(7);
         const hintModel = new HintModel();
-        const hint = hintModel.generateGeneralHint(problem);
 
-        expect(hint).toBe("No hint available.");
+        expect(() => hintModel.generateGeneralHint(problem))
+            .toThrow("Invalid Level Type");
     });
 });
 
@@ -174,7 +174,7 @@ describe("check specific hint level generation", () => {
         const hintModel = new HintModel();
         const hint = hintModel.generateSpecificHint(problem);
 
-        expect(hint).toBe("Do 1 and 1 have a common multiple that we " +
+        expect(hint).toBe("Do 2 and 1 have a common multiple that we " +
                 "can divide by?");
     });
 
@@ -221,8 +221,8 @@ describe("check specific hint level generation", () => {
     test("generates invalid level specific hint", () => {
         const problem = createProblem(7);
         const hintModel = new HintModel();
-        const hint = hintModel.generateSpecificHint(problem);
 
-        expect(hint).toThrow("Invalid Level Type");
+        expect(() => hintModel.generateSpecificHint(problem))
+            .toThrow("Invalid Level Type");
     });
 });
