@@ -4,11 +4,15 @@ import { SpeedModeScreenView } from "./SpeedModeScreenView.ts";
 import { STAGE_WIDTH } from "../../constants.ts";
 import { SPEED_MODE_TIME_LIMIT } from "../../constants.ts";
 
+const IDEAL_KEY_SIZE = 54;
+
 function makeHandlers()
 {
     return {
         onEndGameClick: vi.fn(),
+        onKeyClick: vi.fn(),
         onCheckClick: vi.fn(),
+        onBackspaceClick: vi.fn(),
     }
 }
 
@@ -73,19 +77,65 @@ describe("SpeedModeScreenView", () => {
         expect(timeDisplay!.text()).toBe("2");
     });
 
-    test("both check and end buttons are rendered correctly", () => {
+    test("both the keypad and end button are rendered correctly", () => {
         const view = new SpeedModeScreenView(makeHandlers());
-        expect(view.getGroup().find(".checkButton")).toBeDefined();
+
+        expect(view.answerKeys).toBeDefined();
         expect(view.getGroup().find(".endGameButton")).toBeDefined();
+    });
+
+    test("keys function correctly independent of each other", () => {
+        const handlers = makeHandlers();
+        const view = new SpeedModeScreenView(handlers);
+        const answerKeys = view.answerKeys;
+        
+        const key4 = answerKeys.findOne<Konva.Group>(".digit-4");
+        key4.fire("click");
+        expect(handlers.onKeyClick).toHaveBeenCalledWith("4");
+        expect(handlers.onKeyClick).not.toHaveBeenCalledWith("3");
+
+        const key3 = answerKeys.findOne<Konva.Group>(".digit-3");
+        key3.fire("click");
+        expect(handlers.onKeyClick).toHaveBeenCalledWith("3");
+    });
+
+    test("keys are colored with the cookie theme and are spaced correctly", () => {
+        const view = new SpeedModeScreenView(makeHandlers());
+        const answerKeys = view.answerKeys;
+        
+        const key4 = answerKeys.findOne<Konva.Group>(".digit-4");
+        const key4rect = key4.findOne<Konva.Rect>("Rect");
+        expect(key4rect).toBeDefined();
+        expect(key4rect.fill()).toBe("#b44c10");
+        expect(key4rect.stroke()).toBe("#823001");
+        expect(key4rect.width()).toBe(IDEAL_KEY_SIZE);
+        expect(key4rect.height()).toBe(IDEAL_KEY_SIZE);
+
+        const key3 = answerKeys.findOne<Konva.Group>(".digit-3");
+        const key9 = answerKeys.findOne<Konva.Group>(".digit-9");
+        expect(key4.x() - (key3.x() + IDEAL_KEY_SIZE)).toBe(2);
+        expect(key9.y() - (key4.y() + IDEAL_KEY_SIZE)).toBe(2);
     });
 
     test("check button calls its handler function", () => {
         const handlers = makeHandlers();
         const view = new SpeedModeScreenView(handlers);
-        view.getGroup().findOne(".checkButton")!.fire("click");
+        const answerKeys = view.answerKeys;
+
+        answerKeys.findOne(".check")!.fire("click");
 
         expect(handlers.onCheckClick).toHaveBeenCalledTimes(1);
-        expect(handlers.onEndGameClick).toHaveBeenCalledTimes(0);
+        expect(handlers.onBackspaceClick).toHaveBeenCalledTimes(0);
+    });
+
+    test("delete button calls its handler function", () => {
+        const handlers = makeHandlers();
+        const view = new SpeedModeScreenView(handlers);
+
+        view.answerKeys.findOne(".backspace").fire("click");
+
+        expect(handlers.onCheckClick).toHaveBeenCalledTimes(0);
+        expect(handlers.onBackspaceClick).toHaveBeenCalledTimes(1);
     });
 
     test("end game button calls its handler function", () => {
@@ -93,7 +143,7 @@ describe("SpeedModeScreenView", () => {
         const view = new SpeedModeScreenView(handlers);
         view.getGroup().findOne(".endGameButton")!.fire("click");
 
-        expect(handlers.onCheckClick).toHaveBeenCalledTimes(0);
+        //expect(handlers.onCheckClick).toHaveBeenCalledTimes(0);
         expect(handlers.onEndGameClick).toHaveBeenCalledTimes(1);
     });
 

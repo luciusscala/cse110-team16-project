@@ -2,6 +2,7 @@ import Konva from "konva";
 import type { View } from "../../types.ts";
 import { STAGE_WIDTH } from "../../constants.ts";
 import { Button } from "../../components/Button.ts";
+import { KeypadBuilder } from "../../components/Keypad.ts";
 import { SPEED_MODE_TIME_LIMIT } from "../../constants.ts";
 
 // General-use text constants
@@ -34,16 +35,24 @@ const END_TEXT_COLOR = "white";
 // End button location constants
 const END_TL_CORNER_DIST = 5;
 
-// Check button location constants
-const SPEED_CHECK_RIGHT_ALIGN = 170;
-const SPEED_CHECK_TOP_ALIGN = 400;
+// Keypad location constants
+//const SPEED_CHECK_RIGHT_ALIGN = 170;
+//const SPEED_CHECK_TOP_ALIGN = 400;
+const PAD_LEFT = 190;
+const PAD_TOP = 400;
+const PAD_KEY = 54;
+const PAD_SPACING = 2;
+const ACTION_WIDTH = 230;
+const ACTION_HEIGHT = 46;
 
 /**
  * Ensures that the appropriate handler functions are passed into SpeedModeScreenView's convstructor
  */
 export interface SpeedModeScreenHandlers {
     onEndGameClick: () => void;
+    onKeyClick: () => void;
     onCheckClick: () => void;
+    onBackspaceClick: () => void;
 }
 
 /**
@@ -120,18 +129,23 @@ export class SpeedModeScreenView implements View {
             textColor: END_TEXT_COLOR,
         });
 
-        const checkButton = new Button({
-            x: STAGE_WIDTH - SPEED_CHECK_RIGHT_ALIGN,
-            y: SPEED_CHECK_TOP_ALIGN,
-            width: SPEED_BUTTON_WIDTH,
-            height: SPEED_BUTTON_HEIGHT,
-            text: "Check",
-            onClick: handlers.onCheckClick, 
-            name: "checkButton"
+        this.answerKeys = KeypadBuilder.buildAnswerKeys({
+            keySize: PAD_KEY,
+            keySpacing: PAD_SPACING,
+            distFromLeft: PAD_LEFT,
+            distFromTop: PAD_TOP,
+            actionWidth: ACTION_WIDTH,
+            actionHeight: ACTION_HEIGHT,
+            onKeyClick: (digit: String) => handlers.onKeyClick(digit),
+            onBackspaceClick: () => handlers.onBackspaceClick(),
+            onCheckClick: () => handlers.onCheckClick(),
+            keyColor: "#b44c10",
+            keyBoarderColor: "#823001"
         });
+        this.group.add(this.answerKeys);
 
         this.group.add(endButton.getGroup());
-        this.group.add(checkButton.getGroup());
+        //this.group.add(checkButton.getGroup());
         this.group.add(secondsText);
         this.group.add(this.remainingTimeDisplay);
         this.group.add(scoreText);
