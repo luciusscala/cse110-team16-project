@@ -59,7 +59,7 @@ export class HintModel{
                 "to be added together. And remember to simplify your final " +
                 "pizza portion into the biggest slice possible!";
             default:
-                return "No hint available.";
+                throw new Error("Invalid Level Type");
         }
     }
 
@@ -96,7 +96,7 @@ export class HintModel{
                 "pizza slice sizes. What number is needed to get each pizza " +
                 "slice size to that same shared size?";
             default:
-                return "No hint available.";
+                throw new Error("Invalid Level Type");
         }
     }
         
