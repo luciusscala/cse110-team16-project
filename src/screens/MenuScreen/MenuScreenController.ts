@@ -7,20 +7,38 @@ import { MenuScreenView } from "./MenuScreenView.ts";
  */
 export class MenuScreenController extends ScreenController {
 	private view: MenuScreenView;
+	private screenSwitcher: ScreenSwitcher;
 
-	// TODO: Store as this.screenSwitcher once there is another screen to switch to
-	constructor(_screenSwitcher: ScreenSwitcher) {
+	constructor(screenSwitcher: ScreenSwitcher) {
 		super();
-		this.view = new MenuScreenView(() => this.handleStartClick());
+		this.screenSwitcher = screenSwitcher;
+
+		this.view = new MenuScreenView({
+			onLevelsClick: () => this.handleLevelsClick(),
+			onMasteryClick: () => this.handleMasteryClick(),
+			onSpeedClick: () => this.handleSpeedClick(),
+		});
 	}
 
 	/**
-	 * Handle start button click
+	 * Handle levels button click
 	 */
-	private handleStartClick(): void {
-		// TODO: Switch to the game screen once it exists:
-		// this.screenSwitcher.switchToScreen({ type: "game" });
-		console.log("Start clicked");
+	private handleLevelsClick(): void {
+		this.screenSwitcher.switchToScreen({ type: "levels" });
+	}
+
+	/**
+	 * Handle mastery button click
+	 */
+	private handleMasteryClick(): void {
+		this.screenSwitcher.switchToScreen({ type: "mastery" });
+	}
+
+	/**
+	 * Handle speed minigame button click
+	 */
+	private handleSpeedClick(): void {
+		this.screenSwitcher.switchToScreen({ type: "speed" });
 	}
 
 	/**

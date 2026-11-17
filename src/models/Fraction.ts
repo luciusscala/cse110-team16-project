@@ -22,16 +22,6 @@ export class Fraction {
 		this.denominator = denominator * sign;
 	}
 
-    /** Returns this fraction's numerator. */
-    getNumer(): number {
-        return this.numerator;
-    }
-
-    /** Returns this fraction's denominator. */
-    getDenom(): number {
-        return this.denominator;
-    }
-
 	/** Returns this fraction in lowest terms. */
 	simplify(): Fraction {
 		const divisor = gcd(this.numerator, this.denominator);
@@ -70,11 +60,6 @@ export class Fraction {
 	isEqual(other: Fraction): boolean {
 		return this.numerator * other.denominator === other.numerator * this.denominator;
 	}
-
-    /** True if fraction is larger than other fraction. */
-    isLarger(other: Fraction): boolean{
-        return this.numerator * other.denominator > other.numerator * this.denominator;
-    }
 
 	toString(): string {
 		return `${this.numerator}/${this.denominator}`;
