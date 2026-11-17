@@ -208,57 +208,95 @@ describe("MasteryScreenController playing", () => {
 	});
 });
 
+
 describe("MasteryScreenController end of game", () => {
 	test("a wrong answer ends the game with the results", () => {
-		const { view, handlers } = startPlaying();
+		const { switcher, handlers } = startPlaying();
 		answer(handlers, "1", "2");
 		answer(handlers, "1", "3");
 
-		expect(view.summary).toEqual({
-			title: "Game over!",
-			correctCount: 1,
-			incorrectCount: 1,
-			detail: "2/3 - 1/6 = 1/2. You answered 1/3.",
+		expect(switcher.switchToScreen).toHaveBeenCalledWith({
+			type: "gameOver",
+			gameId: "masteryMode",
+			score: 1,
+			summary: {
+				title: "Game over!",
+				correctCount: 1,
+				incorrectCount: 1,
+				detail: "2/3 - 1/6 = 1/2. You answered 1/3.",
+			},
 		});
 	});
 
 	test("an equal answer not in lowest terms ends the game with a reminder", () => {
-		const { view, handlers } = startPlaying();
+		const { switcher, handlers } = startPlaying();
 		answer(handlers, "2", "4");
 
-		expect(view.summary!.title).toBe("Game over!");
-		expect(view.summary!.correctCount).toBe(0);
-		expect(view.summary!.detail).toMatch(/You answered 2\/4\./);
-		expect(view.summary!.detail).toMatch(/lowest terms/);
+		expect(switcher.switchToScreen).toHaveBeenCalledWith({
+			type: "gameOver",
+			gameId: "masteryMode",
+			score: 0,
+			summary: {
+				title: "Game over!",
+				correctCount: 0,
+				incorrectCount: 1,
+				detail: expect.stringContaining("You answered 2/4."),
+			},
+		});
+
+		const call = vi.mocked(switcher.switchToScreen).mock.calls[0][0];
+		if (call.type !== "gameOver") {
+			throw new Error("Expected Game Over screen");
+		}
+		expect(call.summary?.detail).toMatch(/lowest terms/);
 	});
 
 	test("the keypad does nothing after the game is over", () => {
-		const { controller, handlers } = startPlaying();
+		const { controller, handlers, switcher } = startPlaying();
 		answer(handlers, "1", "3");
+
 		expect(() => answer(handlers, "1", "2")).not.toThrow();
 		expect(controller.getModel().getAnsweredCount()).toBe(1);
+		expect(switcher.switchToScreen).toHaveBeenCalledTimes(1);
 	});
 
 	test("exiting while playing shows the results so far", () => {
-		const { view, handlers } = startPlaying();
+		const { switcher, handlers } = startPlaying();
 		answer(handlers, "1", "2");
 		handlers.onExit();
 
-		expect(view.summary).toEqual({
-			title: "Game ended",
-			correctCount: 1,
-			incorrectCount: 0,
-			detail: "",
+		expect(switcher.switchToScreen).toHaveBeenCalledWith({
+			type: "gameOver",
+			gameId: "masteryMode",
+			score: 1,
+			summary: {
+				title: "Game ended",
+				correctCount: 1,
+				incorrectCount: 0,
+				detail: "",
+			},
 		});
 	});
 
 	test("exiting during the countdown shows the results and stops the countdown", () => {
-		const { controller, view, handlers } = setup();
+		const { controller, view, switcher, handlers } = setup();
 		controller.startGame();
 		handlers.onExit();
 		vi.advanceTimersByTime(10_000);
 
-		expect(view.summary!.correctCount).toBe(0);
+		expect(switcher.switchToScreen).toHaveBeenCalledWith({
+			type: "gameOver",
+			gameId: "masteryMode",
+			score: 0,
+			summary: {
+				title: "Game ended",
+				correctCount: 0,
+				incorrectCount: 0,
+				detail: "",
+			},
+		});
+
+		expect(switcher.switchToScreen).toHaveBeenCalledTimes(1);
 		expect(view.equation).toBe("");
 	});
 
@@ -285,3 +323,4 @@ describe("MasteryScreenController end of game", () => {
 		expect(switcher.switchToScreen).toHaveBeenCalledWith({ type: "menu" });
 	});
 });
+

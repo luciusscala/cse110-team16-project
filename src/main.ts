@@ -8,6 +8,7 @@ import { GuidedLevelView } from "./guided/GuidedLevelView.ts";
 import { SpeedModeScreenController } from "./screens/SpeedModeScreen/SpeedModeScreenController.ts";
 import { SpeedModeScreenView } from "./screens/SpeedModeScreen/SpeedModeScreenView.ts";
 import { MasteryScreenController } from "./screens/MasteryScreen/MasteryScreenController.ts";
+import { GameOverScreenController } from "./screens/GameOverScreen/GameOverScreenController.ts";
 
 /**
  * Main Application - Coordinates all screens
@@ -25,6 +26,7 @@ class App implements ScreenSwitcher {
 	private guidedController: GuidedLevelController;
 	private speedModeController: SpeedModeScreenController;
 	private masteryController: MasteryScreenController;
+	private gameOverController: GameOverScreenController;
 
 	constructor(container: string) {
 		// Initialize Konva stage (the main canvas)
@@ -47,13 +49,16 @@ class App implements ScreenSwitcher {
 		);
 		this.speedModeController = new SpeedModeScreenController(this);
 		this.masteryController = new MasteryScreenController(this);
-
+		this.gameOverController = new GameOverScreenController(this);
+		
 		// Add all screen groups to the layer
 		this.layer.add(this.menuController.getView().getGroup());
 		this.layer.add(this.levelSelectController.getView().getGroup());
 		this.layer.add(this.guidedController.getView().getGroup());
 		this.layer.add(this.speedModeController.getView().getGroup());
 		this.layer.add(this.masteryController.getView().getGroup());
+		this.layer.add(this.gameOverController.getView().getGroup());
+		
 
 		// Draw the layer (render everything to the canvas)
 		this.layer.draw();
@@ -74,6 +79,7 @@ class App implements ScreenSwitcher {
 		this.guidedController.hide();
 		this.speedModeController.hide();
 		this.masteryController.hide();
+		this.gameOverController.hide();
 
 		// Show the requested screen based on the screen type
 		switch (screen.type) {
@@ -101,6 +107,10 @@ class App implements ScreenSwitcher {
 				this.speedModeController.show();
 				this.speedModeController.startSpeedGame();
 				break;
+			case "gameOver":
+    			this.gameOverController.showResults(screen.gameId, screen.score, screen.summary);
+    			this.gameOverController.show();
+    			break;
 		}
 	}
 }

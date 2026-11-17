@@ -153,8 +153,19 @@ export class MasteryScreenController extends ScreenController {
   }
 
   private endGame(): void {
+    if (this.phase === "over") return;
+    
+    this.stopCountdown();
     this.phase = "over";
-    this.view.showSummary(this.buildSummary());
+
+    const summary = this.buildSummary();
+
+    this.screenSwitcher.switchToScreen({
+      type: "gameOver",
+      gameId: "masteryMode",
+      score: this.model.getCorrectCount(),
+      summary,
+    });
   }
 
   private buildSummary(): MasterySummary {

@@ -3,7 +3,19 @@
  */
 export type MinigameId = "masteryMode" | "speedMode";
 
+export type ScoreEntry = {
+    score: number;
+    timestamp: string;
+};
+
+type ScoreHistory = {
+    masteryMode: ScoreEntry[];
+    speedMode: ScoreEntry[];
+};
+
 const SAVEDSCORES_KEY = "highScore"; 
+const SCORE_HISTORY_KEY = "minigameScoreHistory";
+const MAX_LEADERBOARD_ENTRIES = 5;
 
 // Stores the highest score achieved in each minigame.
 type HighScore = {
@@ -11,11 +23,25 @@ type HighScore = {
     speedMode: number;
 };
 
+function defaultScores(): HighScore {
+    return { masteryMode: 0, speedMode: 0 };
+}
+
+function emptyHistory(): ScoreHistory {
+    return { masteryMode: [], speedMode: [] };
+}
+
+function isValidScore(score: number): boolean {
+    return Number.isFinite(score) && score >= 0;
+}
+
 export class HighScoreModel {
     private highScore: HighScore;
+    private history: ScoreHistory;
 
     constructor() {
         this.highScore = this.loadHighScore();
+        this.history = this.loadHistory();
     }
 
     /** Gets the highest score for the specified minigame.
@@ -34,15 +60,11 @@ export class HighScoreModel {
      * if no data exists or the JSON cannot be parsed.
      */
     private loadHighScore(): HighScore {
-        const defaultScores: HighScore = {
-            masteryMode: 0,
-            speedMode: 0
-        };
 
         const savedData = localStorage.getItem(SAVEDSCORES_KEY);
         
         if (savedData === null) {
-            return defaultScores;
+            return defaultScores();
         }
 
         try {
@@ -66,10 +88,10 @@ export class HighScoreModel {
                 };
             }
         } catch {
-            return defaultScores;
+            return defaultScores();
         }
 
-        return defaultScores;
+        return defaultScores();
     }
 
     /**
@@ -94,7 +116,7 @@ export class HighScoreModel {
      * false otherwise.
      */
     updateHighScore(score: number, gameId: MinigameId): boolean {
-        if  (!Number.isFinite(score) || score < 0) {
+        if  (!isValidScore(score)) {
             return false;
         }
 
@@ -104,5 +126,66 @@ export class HighScoreModel {
             return true;
         }
         return false;
+    }
+
+    /**
+     * Records a completed game, updates its personal best, and saves the
+     * five highest attempts for that mode. Call this ONCE at game over.
+     */
+    recordScore(score: number, gameId: MinigameId): readonly ScoreEntry[] {
+        if (!isValidScore(score)) {
+            throw new Error("Score must be a finite, nonnegative number");
+        }
+
+        this.updateHighScore(score, gameId);
+        const next = [
+            ...this.history[gameId],
+            { score, timestamp: new Date().toISOString() },
+        ];
+        next.sort((a, b) => b.score - a.score);
+        this.history[gameId] = next.slice(0, MAX_LEADERBOARD_ENTRIES);
+        this.saveHistory();
+        return this.getLeaderboard(gameId);
+    }
+
+    /** Returns a copy of the five highest recorded attempts for one mode. */
+    getLeaderboard(gameId: MinigameId): readonly ScoreEntry[] {
+        return this.history[gameId].map((entry) => ({ ...entry }));
+    }
+    
+    private loadHistory(): ScoreHistory {
+        const savedData = localStorage.getItem(SCORE_HISTORY_KEY);
+        if (savedData === null) return emptyHistory();
+
+        try {
+            const data: unknown = JSON.parse(savedData);
+            if (typeof data !== "object" || data === null) return emptyHistory();
+            const record = data as {
+                masteryMode?: unknown;
+                speedMode?: unknown;
+            };
+            const result = emptyHistory();
+
+            for (const gameId of ["masteryMode", "speedMode"] as const) {
+                const entries = record[gameId];
+                if (!Array.isArray(entries)) continue;
+                result[gameId] = entries
+                    .filter((entry): entry is ScoreEntry =>
+                        typeof entry === "object" && entry !== null &&
+                        typeof entry.score === "number" &&
+                        isValidScore(entry.score) &&
+                        typeof entry.timestamp === "string")
+                    .map((entry) => ({ score: entry.score, timestamp: entry.timestamp }))
+                    .sort((a, b) => b.score - a.score)
+                    .slice(0, MAX_LEADERBOARD_ENTRIES);
+            }
+            return result;
+        } catch {
+            return emptyHistory();
+        }
+    }
+
+    private saveHistory(): void {
+        localStorage.setItem(SCORE_HISTORY_KEY, JSON.stringify(this.history));
     }
 }

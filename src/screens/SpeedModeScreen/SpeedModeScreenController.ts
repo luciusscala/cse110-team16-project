@@ -12,6 +12,8 @@ export class SpeedModeScreenController extends ScreenController {
     private model: SpeedModeScreenModel;
     private screenSwitcher: ScreenSwitcher;
 
+    private gameEnded = false;
+
     /**
      * Creates the controller by constructing a view and model for the Speed Mode Screen.
      */
@@ -34,7 +36,8 @@ export class SpeedModeScreenController extends ScreenController {
      * starting the timer.
      */
     startSpeedGame(): void {
-        
+        this.gameEnded = false;
+
         // Reset score stored in model, and the displayed score/time values
         this.model.reset();
         this.view.updateScore(this.model.getScore());
@@ -79,8 +82,16 @@ export class SpeedModeScreenController extends ScreenController {
      * game over screen and display the appropriate information once it is implemented
      */
     private handleEndGame(): void {
+        if(this.gameEnded) return;
+
+        this.gameEnded = true;
         this.endTimer();
-        this.screenSwitcher.switchToScreen({ type: "menu" });
+        
+        this.screenSwitcher.switchToScreen({ 
+            type: "gameOver",
+            gameId: "speedMode",
+            score: this.model.getScore(), 
+        });
     }
 
     private handleKeyClick(digit: String): void {
