@@ -7,13 +7,13 @@ export class ProblemFactory {
     createProblem(type: ProblemType, level: number): Problem {
         switch(level){
             case 1:
-                return this.createLevel2Problem(type);
+                return this.createLevel1Problem(type);
             case 2:
-                return this.createLevel4Problem(type);
+                return this.createLevel2Problem(type);
             case 3:
-                return this.createLevel5Problem(type);
+                return this.createLevel3Problem(type);
             case 4:
-                return this.createLevel6Problem(type);
+                return this.createLevel4Problem(type);
             default:
                 throw new Error("Invalid Level Type");
         }
