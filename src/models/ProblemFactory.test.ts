@@ -5,25 +5,11 @@ import { ProblemType } from "./ProblemType.ts";
 import { ProblemFactory } from "./ProblemFactory.ts";
 
 describe("levels", () => {
-    test("level 1 problem", () => {
-        const factory = new ProblemFactory();
-        const problem = factory.createProblem(ProblemType.ADDITION, 1);
-
-        expect(problem.getLevel()).toBe(2);
-    });
-
     test("level 2 problem", () => {
         const factory = new ProblemFactory();
         const problem = factory.createProblem(ProblemType.ADDITION, 2);
 
         expect(problem.getLevel()).toBe(2);
-    });
-
-    test("level 3 problem", () => {
-        const factory = new ProblemFactory();
-        const problem = factory.createProblem(ProblemType.ADDITION, 3);
-
-        expect(problem.getLevel()).toBe(4);
     });
 
     test("level 4 problem", () => {
@@ -71,7 +57,7 @@ describe("denominator checks", () => {
 
     test("level 5 denominators not same", () => {
         const factory = new ProblemFactory();
-        const problem = factory.createProblem(ProblemType.ADDITION, 4);
+        const problem = factory.createProblem(ProblemType.ADDITION, 5);
 
         expect(problem.getFrac1().denominator).not.toBe(getFrac2().denominator);
         expect(
@@ -82,7 +68,7 @@ describe("denominator checks", () => {
 
     test("level 6 denominators not same", () => {
         const factory = new ProblemFactory();
-        const problem = factory.createProblem(ProblemType.ADDITION, 4);
+        const problem = factory.createProblem(ProblemType.ADDITION, 6);
 
         expect(problem.getFrac1().denominator).not.toBe(getFrac2().denominator);
         expect(

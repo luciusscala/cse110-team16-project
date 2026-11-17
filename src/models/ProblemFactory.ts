@@ -6,12 +6,8 @@ export class ProblemFactory {
 
     createProblem(type: ProblemType, level: number): Problem {
         switch(level){
-            case 1:
-                return this.createLevel2Problem(type);
             case 2:
                 return this.createLevel2Problem(type);
-            case 3:
-                return this.createLevel4Problem(type);
             case 4:
                 return this.createLevel4Problem(type);
             case 5:
