@@ -81,7 +81,7 @@ export class HintModel{
                 "we can divide by?";
             case 3:
                 return "Can " + problem.getFrac1().denominator + " be multiplied " +
-                "by a number to get " + problem.getFrac1().denominator + "? " +
+                "by a number to get " + problem.getFrac2().denominator + "? " +
                 "Remember to combine your final pizza portion into the " +
                 "biggest slice size possible!";
             case 4:
