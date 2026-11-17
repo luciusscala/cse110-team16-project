@@ -1,4 +1,5 @@
 import type { Group } from "konva/lib/Group";
+import type { MinigameId } from "./models/HighScoreModel.ts";
 
 export interface View {
 	getGroup(): Group;
@@ -16,11 +17,12 @@ export interface View {
  * - "guided": Step-by-step walkthrough of a guided campaign level
  */
 export type Screen =
-	| { type: "menu" }
-	| { type: "levels" }
-	| { type: "mastery" }
-	| { type: "speed" }
-	| { type: "guided"; levelId: number };
+    | { type: "menu" }
+    | { type: "levels" }
+    | { type: "mastery" }
+    | { type: "speed" }
+    | { type: "guided"; levelId: number }
+    | { type: "gameOver"; gameId: MinigameId; score: number };
 
 export abstract class ScreenController {
 	abstract getView(): View;
