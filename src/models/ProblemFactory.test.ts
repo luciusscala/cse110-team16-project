@@ -35,14 +35,14 @@ describe("levels", () => {
 });
 
 describe("denominator checks", () => {
-    test("level 1 equal denominators", () => {
+    test("level 1 have equal denominators", () => {
         const factory = new ProblemFactory();
         const problem = factory.createProblem(ProblemType.ADDITION, 1);
 
         expect(problem.getFrac1().denominator).toBe(problem.getFrac2().denominator);
     });
 
-    test("level 2 denominator common factor", () => {
+    test("level 2 denominators have a common factor", () => {
         const factory = new ProblemFactory();
         const problem = factory.createProblem(ProblemType.ADDITION, 2);
 
@@ -52,14 +52,14 @@ describe("denominator checks", () => {
             )).toBeGreaterThan(1);
     });
 
-    test("level 3 denominators not same", () => {
+    test("level 3 denominators are not equal", () => {
         const factory = new ProblemFactory();
         const problem = factory.createProblem(ProblemType.ADDITION, 3);
 
         expect(problem.getFrac1().denominator).not.toBe(problem.getFrac2().denominator);
     });
 
-    test("level 4 denominators not same", () => {
+    test("level 4 denominators are not equal", () => {
         const factory = new ProblemFactory();
         const problem = factory.createProblem(ProblemType.ADDITION, 4);
 
