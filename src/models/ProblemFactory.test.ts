@@ -63,7 +63,7 @@ describe("denominator checks", () => {
         expect(
             gcd(
                 problem.getFrac1().denominator, problem.getFrac2().denominator
-            )).ToBe(1);
+            )).toBe(1);
     });
 
     test("level 6 denominators not same", () => {
@@ -74,6 +74,6 @@ describe("denominator checks", () => {
         expect(
             gcd(
                 problem.getFrac1().denominator, problem.getFrac2().denominator
-            )).ToBe(1);
+            )).toBe(1);
     });
 });
