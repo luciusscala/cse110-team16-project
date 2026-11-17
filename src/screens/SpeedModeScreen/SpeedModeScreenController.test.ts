@@ -31,7 +31,7 @@ describe("SpeedModeScreenController", () => {
     // change this test once actual checks are implemented
     test("check button increases score", () => {
         const { controller, switcher } = makeController();
-        controller.getView().getGroup().findOne(".checkButton")!.fire("click");
+        controller.getView().answerKeys.findOne(".check").fire("click");
 
         expect(controller.getModel().getScore()).toBe(1);
         controller.getModel().reset();
