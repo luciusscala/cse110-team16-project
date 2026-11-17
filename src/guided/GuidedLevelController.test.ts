@@ -8,7 +8,7 @@ import type {
 	GuidedLevelHandlers,
 	GuidedLevelViewPort,
 	QuestionHeader,
-} from "./GuidedLevelViewPort.ts";
+} from "./GuidedLevelView.ts";
 import type { StepPrompt } from "./stepPrompts.ts";
 
 /** Records everything the controller shows, so tests can read it back. */
