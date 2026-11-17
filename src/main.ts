@@ -1,8 +1,8 @@
 import Konva from "konva";
 import type { ScreenSwitcher, Screen } from "./types.ts";
 import { MenuScreenController } from "./screens/MenuScreen/MenuScreenController.ts";
-import { STAGE_WIDTH, STAGE_HEIGHT, NUM_LVLS } from "./constants.ts";
-import { ProgressManager } from "./persistence/ProgressManager.ts";
+import { STAGE_WIDTH, STAGE_HEIGHT } from "./constants.ts";
+import { LevelSelectScreenController } from "./screens/LevelSelectScreen/LevelSelectScreenController.ts";
 import { GuidedLevelController } from "./guided/GuidedLevelController.ts";
 import { GuidedLevelView } from "./guided/GuidedLevelView.ts";
 import { SpeedModeScreenController } from "./screens/SpeedModeScreen/SpeedModeScreenController.ts";
@@ -21,6 +21,7 @@ class App implements ScreenSwitcher {
 	private layer: Konva.Layer;
 
 	private menuController: MenuScreenController;
+	private levelSelectController: LevelSelectScreenController;
 	private guidedController: GuidedLevelController;
 	private speedModeController: SpeedModeScreenController;
 	private masteryController: MasteryScreenController;
@@ -39,6 +40,7 @@ class App implements ScreenSwitcher {
 
 		// Initialize all screen controllers
 		this.menuController = new MenuScreenController(this);
+		this.levelSelectController = new LevelSelectScreenController(this);
 		this.guidedController = new GuidedLevelController(
 			this,
 			(handlers) => new GuidedLevelView(handlers),
@@ -48,6 +50,7 @@ class App implements ScreenSwitcher {
 
 		// Add all screen groups to the layer
 		this.layer.add(this.menuController.getView().getGroup());
+		this.layer.add(this.levelSelectController.getView().getGroup());
 		this.layer.add(this.guidedController.getView().getGroup());
 		this.layer.add(this.speedModeController.getView().getGroup());
 		this.layer.add(this.masteryController.getView().getGroup());
@@ -67,6 +70,7 @@ class App implements ScreenSwitcher {
 	switchToScreen(screen: Screen): void {
 		// Hide all screens first
 		this.menuController.hide();
+		this.levelSelectController.hide();
 		this.guidedController.hide();
 		this.speedModeController.hide();
 		this.masteryController.hide();
@@ -77,20 +81,15 @@ class App implements ScreenSwitcher {
 				this.menuController.show();
 				break;
 			case "levels":
-				// TODO: Show a level select screen. Until then, open the first
-				// level the player has not completed.
-				this.switchToScreen({
-					type: "guided",
-					levelId: Math.min(ProgressManager.getUserProgress() + 1, NUM_LVLS),
-				});
+				this.levelSelectController.show();
 				break;
 			case "guided":
 				if (this.guidedController.startLevel(screen.levelId)) {
 					this.guidedController.show();
 				} else {
-					// Not a guided level (yet), so stay on the menu.
+					// Not a guided level (yet), so go back to picking a level.
 					console.log(`Level ${screen.levelId} is not available yet`);
-					this.menuController.show();
+					this.levelSelectController.show();
 				}
 				break;
 			case "mastery":
