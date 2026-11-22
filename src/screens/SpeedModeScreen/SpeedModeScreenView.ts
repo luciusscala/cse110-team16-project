@@ -79,6 +79,7 @@ export class SpeedModeScreenView implements View {
         this.group = new Konva.Group({visible: true});
 
         const screenBackdrop = new Konva.Rect({
+            name: "backdrop",
             x: 0,
             y: 0,
             width: STAGE_WIDTH,
@@ -88,6 +89,7 @@ export class SpeedModeScreenView implements View {
         this.group.add(screenBackdrop);
 
         const answerKeysBackdrop = new Konva.Rect({
+            name: "keyBackdrop",
             X: PAD_LEFT - KEY_BACKDROP_SEPERATION,
             y: PAD_TOP - KEY_BACKDROP_SEPERATION,
             width: STAGE_WIDTH,
@@ -98,6 +100,18 @@ export class SpeedModeScreenView implements View {
             strokeWidth: KEY_BACKDROP_STROKE_WIDTH,
         });
         this.group.add(answerKeysBackdrop);
+
+        this.lineImage = null;
+        Konva.Image.fromURL("/cookie_line.png", (image) => {
+            image.width(SHOP_IMAGE_SIZE);
+            image.height(SHOP_IMAGE_SIZE / 2);
+            image.x(STAGE_WIDTH / 2);
+            image.y(PAD_TOP - (SHOP_IMAGE_SIZE / 2) - SHOP_IMAGE_KEY_SEPERATION);
+            image.listening(false);
+            image.id('lineImage');
+            this.group.add(image);
+            this.lineImage = image;
+        });
 
         const secondsText = new Konva.Text({
 			x: STAGE_WIDTH - LABEL_RIGHT_ALIGN,
@@ -172,15 +186,6 @@ export class SpeedModeScreenView implements View {
             onCheckClick: () => handlers.onCheckClick(),
             keyColor: "#b44c10",
             keyBoarderColor: "#823001"
-        });
-
-        Konva.Image.fromURL("/cookie_line.png", (lineImage) => {
-            lineImage.width(SHOP_IMAGE_SIZE);
-            lineImage.height(SHOP_IMAGE_SIZE / 2);
-            lineImage.x(STAGE_WIDTH / 2);
-            lineImage.y(PAD_TOP - (SHOP_IMAGE_SIZE / 2) - SHOP_IMAGE_KEY_SEPERATION);
-            lineImage.listening(false);
-            this.group.add(lineImage);
         });
 
         this.group.add(this.answerKeys);

@@ -5,6 +5,9 @@ import { STAGE_WIDTH } from "../../constants.ts";
 import { SPEED_MODE_TIME_LIMIT } from "../../constants.ts";
 
 const IDEAL_KEY_SIZE = 54;
+const PAD_LEFT = 190;
+const PAD_TOP = 400;
+const IDEAL_BACKDROP_KEY_SEPERATION = 30;
 
 function makeHandlers()
 {
@@ -143,7 +146,6 @@ describe("SpeedModeScreenView", () => {
         const view = new SpeedModeScreenView(handlers);
         view.getGroup().findOne(".endGameButton")!.fire("click");
 
-        //expect(handlers.onCheckClick).toHaveBeenCalledTimes(0);
         expect(handlers.onEndGameClick).toHaveBeenCalledTimes(1);
     });
 
@@ -159,4 +161,40 @@ describe("SpeedModeScreenView", () => {
 		const view = new SpeedModeScreenView(makeHandlers());
 		expect(view.getGroup().visible()).toBe(true);
 	});
+
+    test("backdrop is behind all other elements onscreen, and is the correct color", () => {
+        const view = new SpeedModeScreenView(makeHandlers());
+        const backdrop = view.getGroup().findOne<Konva.Rect>(".backdrop");
+        expect(backdrop).toBeDefined();
+
+        expect(backdrop.zIndex()).toBe(0);
+        expect(backdrop.fill()).toBe("#e0abff");
+    });
+
+    test("key backdrop is behind the keypad", () => {
+        const view = new SpeedModeScreenView(makeHandlers());
+        const answerKeys = view.answerKeys;
+        const keyBackdrop = view.getGroup().findOne<Konva.Rect>(".keyBackdrop");
+        
+        expect(keyBackdrop).toBeDefined();
+        expect(keyBackdrop.zIndex()).toBeLessThan(answerKeys.zIndex());
+    });
+
+    test("key backdrop is rendered with correct properties", () => {
+        const view = new SpeedModeScreenView(makeHandlers());
+        const keyBackdrop = view.getGroup().findOne<Konva.Rect>(".keyBackdrop");
+
+        expect(keyBackdrop.fill()).toBe("lightgray");
+        expect(keyBackdrop.stroke()).toBe("gray");
+        expect(keyBackdrop.strokeWidth()).toBe(15);
+        expect(keyBackdrop.width()).toBe(STAGE_WIDTH);
+        expect(keyBackdrop.x()).toBe(PAD_LEFT - IDEAL_BACKDROP_KEY_SEPERATION);
+        expect(keyBackdrop.y()).toBe(PAD_TOP - IDEAL_BACKDROP_KEY_SEPERATION); 
+    });
+
+    test("line image is rendered correctly", () => {
+        const view = new SpeedModeScreenView(makeHandlers());
+
+        expect(view.lineImage).toBeDefined();
+    });
 });

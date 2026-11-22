@@ -107,6 +107,7 @@ export class MasteryScreenView implements MasteryScreenViewPort {
 
 		// Playing
 		const screenBackdrop = new Konva.Rect({
+			name: "backdrop",
 			x: 0,
 			y: 0,
 			width: STAGE_WIDTH,
@@ -127,13 +128,13 @@ export class MasteryScreenView implements MasteryScreenViewPort {
 		this.playGroup.add(answerKeysBackdrop);
 
 		Konva.Image.fromURL("/baker_alright.png", (bakerImage) => {
-			bakerImage.id('baker-image');
 			bakerImage.x(BAKER_X);
 			bakerImage.y(BAKER_Y);
 			bakerImage.width(BAKER_SIZE);
 			bakerImage.height(BAKER_SIZE / 2);
 			bakerImage.listening(false);
 			this.playGroup.add(bakerImage);
+			bakerImage.name("baker-image");
 		});
 
 		Konva.Image.fromURL("/cake_plate_4+.png", (cakeImage) => {
