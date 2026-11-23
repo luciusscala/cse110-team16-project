@@ -19,7 +19,10 @@
         background: #3b2415;
       }
 
+      /* The Konva canvas is transparent; screens without their own
+         background art need a light backdrop behind them. */
       #container {
+        background: #ffffff;
         border-radius: 12px;
         overflow: hidden;
         box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
