@@ -3,6 +3,12 @@ import Konva from "konva";
 /** Bottom of the oven opening, where the flames sit on the ledge. */
 const FIRE_BASE_Y = 432;
 
+/**
+ * How fast the fire flickers relative to the base wave speeds below.
+ * Lower is slower and calmer; 1 is the original fast flicker.
+ */
+const FIRE_SPEED = 0.35;
+
 /** Quadratic curve segment: [controlX, controlY, endX, endY]. */
 type Segment = [number, number, number, number];
 
@@ -123,9 +129,9 @@ export class OvenFire {
 
 	/** Advance the fire to the given time in milliseconds. */
 	update(timeMs: number): void {
-		this.time = timeMs;
+		this.time = timeMs * FIRE_SPEED;
 		// Glow pulses a little out of step with the flames
-		const pulse = 0.5 * Math.sin(timeMs * 0.006) + 0.5 * Math.sin(timeMs * 0.0137 + 1.3);
+		const pulse = 0.5 * Math.sin(this.time * 0.006) + 0.5 * Math.sin(this.time * 0.0137 + 1.3);
 		this.glow.opacity(0.8 + 0.2 * pulse);
 		this.glow.scaleY(1 + 0.06 * pulse);
 	}
