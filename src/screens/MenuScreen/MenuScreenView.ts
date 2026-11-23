@@ -3,6 +3,7 @@ import type { View } from "../../types.ts";
 import { STAGE_WIDTH, STAGE_HEIGHT } from "../../constants.ts";
 import { Button } from "../../components/Button.ts";
 import backgroundUrl from "../../assets/menu-background.svg";
+import { OvenFire } from "./OvenFire.ts";
 
 const BUTTON_WIDTH = 300;
 const BUTTON_HEIGHT = 60;
@@ -27,12 +28,17 @@ export interface MenuScreenHandlers {
 export class MenuScreenView implements View {
 	private group: Konva.Group;
 	private buttons: Button[];
+	private ovenFire: OvenFire;
 
 	constructor(handlers: MenuScreenHandlers) {
 		this.group = new Konva.Group({ visible: true });
 
 		// Background art goes first so it's drawn behind everything else
 		this.group.add(this.createBackground());
+
+		// Animated fire sits on top of the background, inside the oven opening
+		this.ovenFire = new OvenFire();
+		this.group.add(this.ovenFire.getGroup());
 
 		// Title text, spanning the stage width so align centers it
 		const title = new Konva.Text({
@@ -119,6 +125,7 @@ export class MenuScreenView implements View {
 	 */
 	show(): void {
 		this.group.visible(true);
+		this.ovenFire.start();
 		this.group.getLayer()?.draw();
 	}
 
@@ -127,11 +134,16 @@ export class MenuScreenView implements View {
 	 */
 	hide(): void {
 		this.group.visible(false);
+		this.ovenFire.stop();
 		this.group.getLayer()?.draw();
 	}
 
 	getGroup(): Konva.Group {
 		return this.group;
+	}
+
+	getOvenFire(): OvenFire {
+		return this.ovenFire;
 	}
 
 	getButtons(): Button[] {

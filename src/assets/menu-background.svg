@@ -16,10 +16,6 @@
       <rect width="20" height="20" fill="#d9412b"/>
       <rect x="20" y="20" width="20" height="20" fill="#d9412b"/>
     </pattern>
-    <radialGradient id="fireGlow" cx="0.5" cy="0.8" r="0.7">
-      <stop offset="0" stop-color="#ffcf4a" stop-opacity="0.9"/>
-      <stop offset="1" stop-color="#ff7a1a" stop-opacity="0"/>
-    </radialGradient>
   </defs>
 
   <!-- Back wall -->
@@ -31,10 +27,7 @@
         fill="url(#brick)" stroke="#4a2511" stroke-width="5"/>
   <path d="M52 435 V345 Q52 285 110 285 Q168 285 168 345 V435 Z"
         fill="#2b1a12" stroke="#4a2511" stroke-width="5"/>
-  <ellipse cx="110" cy="410" rx="62" ry="50" fill="url(#fireGlow)"/>
-  <path d="M68 432 Q70 395 84 380 Q86 400 96 404 Q96 370 112 352 Q114 385 128 392 Q132 372 146 366 Q154 400 152 432 Z"
-        fill="#ff7a1a" stroke="#4a2511" stroke-width="3" stroke-linejoin="round"/>
-  <path d="M86 432 Q88 410 98 402 Q102 416 110 418 Q112 398 122 388 Q128 410 136 432 Z" fill="#ffd45c"/>
+  <!-- Flames and glow are animated in code: see OvenFire.ts -->
   <rect x="40" y="432" width="140" height="14" rx="4" fill="#8b5a2b" stroke="#4a2511" stroke-width="3"/>
 
   <!-- Chalkboard menu (right) -->

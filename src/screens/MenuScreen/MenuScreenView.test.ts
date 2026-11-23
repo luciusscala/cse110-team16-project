@@ -32,6 +32,22 @@ describe("MenuScreenView", () => {
 		expect(background!.listening()).toBe(false);
 	});
 
+	test("draws the oven fire above the background", () => {
+		const view = new MenuScreenView(makeHandlers());
+		const fire = view.getGroup().findOne(".ovenFire");
+		expect(fire).toBeDefined();
+		expect(fire!.zIndex()).toBe(1);
+	});
+
+	test("animates the oven fire only while the menu is shown", () => {
+		const view = new MenuScreenView(makeHandlers());
+		new Konva.Layer().add(view.getGroup());
+		view.show();
+		expect(view.getOvenFire().isRunning()).toBe(true);
+		view.hide();
+		expect(view.getOvenFire().isRunning()).toBe(false);
+	});
+
 	test("renders the subtitle centered across the stage", () => {
 		const view = new MenuScreenView(makeHandlers());
 		const subtitle = view.getGroup().findOne<Konva.Text>(".subtitle");
