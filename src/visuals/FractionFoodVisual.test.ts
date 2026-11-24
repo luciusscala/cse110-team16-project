@@ -121,9 +121,10 @@ describe("FractionFoodVisual", () => {
         expect(wedges(visual.getGroup())).toHaveLength(6);
     });
 
-    test("shows the text fallback when more than four whole foods are required", () => {
+    test("shows the fraction value when more than four whole foods are required", () => {
         const group = draw("cake", 5, 1);
         expect(wedges(group)).toHaveLength(0);
-        expect((group.find("Text") as Konva.Text[]).some(node => node.text() === "5 of 1 equal pieces")).toBe(true);
+        expect((group.find("Text") as Konva.Text[])
+            .some(node => node.text() === "5/1")).toBe(true);
     });
 });
