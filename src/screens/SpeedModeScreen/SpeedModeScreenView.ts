@@ -4,6 +4,8 @@ import { STAGE_WIDTH } from "../../constants.ts";
 import { Button } from "../../components/Button.ts";
 import { KeypadBuilder } from "../../components/Keypad.ts";
 import { SPEED_MODE_TIME_LIMIT } from "../../constants.ts";
+import { FractionFoodVisual } from "../../visuals/FractionFoodVisual.ts";
+import type { FoodTile } from "../../visuals/FoodVisualState.ts";
 
 // General-use text constants
 const LABEL_RIGHT_ALIGN = 200;
@@ -60,6 +62,7 @@ export interface SpeedModeScreenHandlers {
  */
 export class SpeedModeScreenView implements View {
     private group = Konva.group;
+    private readonly foodVisual = new FractionFoodVisual();
 
     /**
      * Creates the screen as it is when starting the Speech Challenge minigame.
@@ -67,6 +70,11 @@ export class SpeedModeScreenView implements View {
     constructor(handlers: SpeedModeScreenHandlers)
     {
         this.group = new Konva.Group({visible: true});
+        const foodGroup = this.foodVisual.getGroup();
+        foodGroup.position({ x: 10, y: 75 });
+        const foodScale = Math.min(0.85, STAGE_WIDTH * 0.30 / 290);
+        foodGroup.scale({ x: foodScale, y: foodScale });
+        this.group.add(foodGroup);
 
         const secondsText = new Konva.Text({
 			x: STAGE_WIDTH - LABEL_RIGHT_ALIGN,
@@ -150,6 +158,11 @@ export class SpeedModeScreenView implements View {
         this.group.add(this.remainingTimeDisplay);
         this.group.add(scoreText);
         this.group.add(this.scoreDisplay);
+    }
+
+    /** Displays the existing problem fractions as cookies. */
+    showFoodTiles(tiles: readonly FoodTile[]): void {
+        this.foodVisual.render("cookie", tiles, "vertical");
     }
 
     /**

@@ -4,6 +4,8 @@ import { Button } from "../components/Button.ts";
 import { KeypadBuilder } from "../components/Keypad.ts";
 import type { View } from "../types.ts";
 import type { StepPrompt } from "./stepPrompts.ts";
+import { FractionFoodVisual } from "../visuals/FractionFoodVisual.ts";
+import type { FoodTile } from "../visuals/FoodVisualState.ts";
 
 /** Whether feedback is praise or a nudge to try again, so the view can style it. */
 export type FeedbackTone = "correct" | "tryAgain";
@@ -35,6 +37,7 @@ export interface GuidedLevelHandlers {
  */
 export interface GuidedLevelViewPort extends View {
 	showQuestion(header: QuestionHeader): void;
+	showFoodTiles?(tiles: readonly FoodTile[]): void;
 	/** Shows a step's instruction and boxes, and where the player is in the steps. */
 	showStep(
 		prompt: StepPrompt,
@@ -108,6 +111,7 @@ interface AnswerBox {
  * in GuidedLevelController. This class only draws and forwards clicks.
  */
 export class GuidedLevelView implements GuidedLevelViewPort {
+	private readonly foodVisual = new FractionFoodVisual();
 	private readonly handlers: GuidedLevelHandlers;
 	private readonly group = new Konva.Group({ visible: false });
 	private readonly headerText: Konva.Text;
@@ -126,6 +130,10 @@ export class GuidedLevelView implements GuidedLevelViewPort {
 		this.equationText = this.addCenteredText("", 52, 40, COLORS.text);
 		this.feedbackText = this.addCenteredText("", 376, 20, COLORS.text);
 
+		const foodGroup = this.foodVisual.getGroup();
+		foodGroup.position({ x: 5, y: 255 });
+		foodGroup.scale({ x: 0.80, y: 0.80 });
+		this.group.add(foodGroup);
 		this.group.add(this.stepContent);
 		this.group.add(
 			new Button({
@@ -184,6 +192,10 @@ export class GuidedLevelView implements GuidedLevelViewPort {
 
 	getGroup(): Konva.Group {
 		return this.group;
+	}
+
+	showFoodTiles(tiles: readonly FoodTile[]): void {
+    	this.foodVisual.render("pizza", tiles, "horizontal");
 	}
 
 	showQuestion(header: QuestionHeader): void {

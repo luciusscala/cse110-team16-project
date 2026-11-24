@@ -2,6 +2,8 @@ import Konva from "konva";
 import { STAGE_WIDTH } from "../../constants.ts";
 import { Button } from "../../components/Button.ts";
 import { KeypadBuilder } from "../../components/Keypad.ts";
+import { FractionFoodVisual } from "../../visuals/FractionFoodVisual.ts";
+import type { FoodTile } from "../../visuals/FoodVisualState.ts";
 import type {
 	MasteryScreenHandlers,
 	MasteryScreenViewPort,
@@ -60,6 +62,7 @@ interface AnswerBox {
  * MasteryScreenController. This class only draws and forwards clicks.
  */
 export class MasteryScreenView implements MasteryScreenViewPort {
+	private readonly foodVisual = new FractionFoodVisual();
 	private readonly group = new Konva.Group({ visible: false });
 	private readonly countdownGroup = new Konva.Group({ name: "countdown" });
 	private readonly playGroup = new Konva.Group({ name: "play" });
@@ -112,6 +115,16 @@ export class MasteryScreenView implements MasteryScreenViewPort {
 			this.equationText,
 			this.messageText,
 		);
+		const foodGroup = this.foodVisual.getGroup();
+		foodGroup.position({ x: 10, y: 75 });
+		const foodScale = Math.min(0.85, STAGE_WIDTH * 0.30 / 290);
+		foodGroup.scale({ x: foodScale, y: foodScale });
+		this.playGroup.add(foodGroup);
+		for (const text of [this.equationText, this.messageText]) {
+			text.x(STAGE_WIDTH * 0.32);
+			text.width(STAGE_WIDTH * 0.66);
+		}
+		this.equationText.fontSize(34);
 		this.drawAnswerBoxes(handlers);
 		this.playGroup.add(
 			KeypadBuilder.buildAnswerKeys({
@@ -205,6 +218,10 @@ export class MasteryScreenView implements MasteryScreenViewPort {
 		this.redraw();
 	}
 
+	showFoodTiles(tiles: readonly FoodTile[]): void {
+		this.foodVisual.render("cake", tiles, "vertical");
+	}
+
 	showProblem(equation: string, problemNumber: number): void {
 		this.problemNumberText.text(`Mastery  -  Problem ${problemNumber}`);
 		this.equationText.text(`${equation} =`);
@@ -252,7 +269,7 @@ export class MasteryScreenView implements MasteryScreenViewPort {
 
 	/** Draws the top and bottom answer boxes with a fraction bar between them. */
 	private drawAnswerBoxes(handlers: MasteryScreenHandlers): void {
-		const x = (STAGE_WIDTH - BOX_WIDTH) / 2;
+		const x = STAGE_WIDTH * 0.65 - BOX_WIDTH / 2;
 		const barY = BOXES_TOP + BOX_HEIGHT + FRACTION_GAP / 2;
 		this.addBox(x, BOXES_TOP, handlers);
 		this.playGroup.add(

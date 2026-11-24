@@ -12,7 +12,7 @@ export interface FoodTile {
 
 /** Returns only information appropriate to the step already reached. */
 export function getFoodTiles(
-    question: Question,
+    question: Pick<Question, "frac1" | "frac2" | "operation">,
     phase: VisualPhase,
     solution?: ExpectedSolution,
 ): readonly FoodTile[] {

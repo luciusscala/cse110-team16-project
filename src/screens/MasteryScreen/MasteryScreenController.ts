@@ -6,6 +6,7 @@ import { parseStepAnswer } from "../../guided/answerParsing.ts";
 import { formatEquation } from "../../guided/stepPrompts.ts";
 import { MasteryScreenModel } from "./MasteryScreenModel.ts";
 import { MasteryScreenView } from "./MasteryScreenView.ts";
+import { getFoodTiles, type FoodTile } from "../../visuals/FoodVisualState.ts";
 import type {
   MasteryScreenViewFactory,
   MasteryScreenViewPort,
@@ -26,7 +27,7 @@ const MS_PER_SECOND = 1000;
 type Phase = "idle" | "countdown" | "playing" | "over";
 
 export class MasteryScreenController extends ScreenController {
-  private readonly view: MasteryScreenViewPort;
+  private readonly view: MasteryScreenViewPort & { showFoodTiles?(tiles: readonly FoodTile[]): void };
   private readonly model: MasteryScreenModel;
   private readonly screenSwitcher: ScreenSwitcher;
   private readonly entry = new AnswerEntryModel(ANSWER_FIELD_COUNT);
@@ -104,6 +105,7 @@ export class MasteryScreenController extends ScreenController {
       formatEquation(this.model.getCurrentProblem()),
       this.model.getAnsweredCount() + 1,
     );
+    this.view.showFoodTiles?.(getFoodTiles(this.model.getCurrentProblem(), "original"));
     this.refreshFields();
   }
 

@@ -39,12 +39,15 @@ export class FractionFoodVisual {
     }
 
     /** Redraws fractions after the controller selects a solving phase. */
-    render(food: BakeryFood, tiles: readonly FoodTile[]): void {
+    render(food: BakeryFood, tiles: readonly FoodTile[], layout: "horizontal" | "vertical" = "horizontal"): void {
         this.group.destroyChildren();
-        const positions = tiles.length === 1 ? [350] : [180, 520];
-        
+        const positions = tiles.length === 1 ? [90] : [90, 210];        
         tiles.forEach((tile, i) => {
-            const panel = new Konva.Group({ x: positions[i] ?? 350, y: 80, listening: false });
+            const panel = new Konva.Group({ 
+                x: layout === "vertical" ? 145 : positions[i] ?? 350,
+                y: layout === "vertical" ? 80 + i * 165 : 80, 
+                listening: false 
+            });
             panel.add(new Konva.Text({
                 x: -145, y: -69, width: 290, align: "center",
                 text: tile.label, fontSize: 18, fontFamily: "Arial", fill: "#303030",
@@ -68,7 +71,8 @@ function drawFraction(parent: Konva.Group, fraction: Fraction, food: BakeryFood)
     const { numerator, denominator } = fraction;
     if (!Number.isInteger(numerator) || numerator < 0 ||
         !Number.isInteger(denominator) || denominator <= 0) {
-        throw new Error("Fraction visuals require a nonnegative numerator and positive denominator");
+        parent.add(new Konva.Text({ x: -135, y: -20, width: 270, align: "center", text: `${numerator}/${denominator}`, fontSize: 18, fill: "#333"}))
+        return;
     }
     const wholeCount = Math.max(1, Math.ceil(numerator / denominator));
     
