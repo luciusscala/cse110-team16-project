@@ -65,6 +65,12 @@ const CAKE_X = 250;
 const CAKE_WIDTH = 500;
 const CAKE_HEIGHT = 300;
 
+// Reserved space to the left of the existing artwork and answer boxes.
+const FOOD_LEFT = 12;
+const FOOD_TOP = 145;
+const FOOD_BOTTOM = 290;
+const FOOD_GAP = 12;
+
 interface AnswerBox {
 	readonly rect: Konva.Rect;
 	readonly text: Konva.Text;
@@ -129,6 +135,9 @@ export class MasteryScreenView implements MasteryScreenViewPort {
 		});
 		this.playGroup.add(screenBackdrop);
 		this.playGroup.add(answerKeysBackdrop);
+		// Keep the artwork loaded asynchronously behind the gameplay UI.
+		const artwork = new Konva.Group({ listening: false });
+		this.playGroup.add(artwork);
 
 		Konva.Image.fromURL("/baker_alright.png", (bakerImage) => {
 			bakerImage.x(BAKER_X);
@@ -136,7 +145,8 @@ export class MasteryScreenView implements MasteryScreenViewPort {
 			bakerImage.width(BAKER_SIZE);
 			bakerImage.height(BAKER_SIZE / 2);
 			bakerImage.listening(false);
-			this.playGroup.add(bakerImage);
+			artwork.add(bakerImage);
+			this.redraw();
 			bakerImage.name("baker-image");
 		});
 
@@ -146,7 +156,8 @@ export class MasteryScreenView implements MasteryScreenViewPort {
 			cakeImage.width(CAKE_WIDTH);
 			cakeImage.height(CAKE_HEIGHT);
 			cakeImage.listening(false);
-			this.playGroup.add(cakeImage);
+			artwork.add(cakeImage);
+			this.redraw();
 		});
 
 		this.problemNumberText = this.centeredText("", 20, 20, COLORS.muted, "normal", "problemNumber");
@@ -171,11 +182,7 @@ export class MasteryScreenView implements MasteryScreenViewPort {
 			this.equationText,
 			this.messageText,
 		);
-		const foodGroup = this.foodVisual.getGroup();
-		foodGroup.position({ x: 10, y: 75 });
-		const foodScale = Math.min(0.85, STAGE_WIDTH * 0.30 / 290);
-		foodGroup.scale({ x: foodScale, y: foodScale });
-		this.playGroup.add(foodGroup);
+		this.playGroup.add(this.foodVisual.getGroup());
 		this.drawAnswerBoxes(handlers);
 		this.playGroup.add(
 			KeypadBuilder.buildAnswerKeys({
@@ -270,7 +277,14 @@ export class MasteryScreenView implements MasteryScreenViewPort {
 	}
 
 	showFoodTiles(tiles: readonly FoodTile[]): void {
-		this.foodVisual.render("cake", tiles, "vertical");
+		const top = Math.max(FOOD_TOP,
+            this.equationText.y() + this.equationText.height() + FOOD_GAP);
+        const right = Math.min(CAKE_X, BAKER_X, (STAGE_WIDTH - BOX_WIDTH) / 2) - FOOD_GAP;
+        this.foodVisual.renderInArea("cake", tiles, {
+            x: FOOD_LEFT, y: top,
+            width: Math.max(0, right - FOOD_LEFT),
+            height: Math.max(0, FOOD_BOTTOM - top),
+        });
 	}
 
 	showProblem(equation: string, problemNumber: number): void {
