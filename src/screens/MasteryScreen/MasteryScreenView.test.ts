@@ -1,6 +1,7 @@
 import Konva from "konva";
 import { describe, expect, test, vi } from "vitest";
 import { MasteryScreenView } from "./MasteryScreenView.ts";
+import { STAGE_WIDTH } from "../../constants.ts";
 import type { MasteryScreenHandlers } from "./MasteryScreenViewPort.ts";
 
 function makeHandlers(): MasteryScreenHandlers {
@@ -99,5 +100,25 @@ describe("MasteryScreenView", () => {
 		expect(handlers.onExit).toHaveBeenCalled();
 		expect(handlers.onPlayAgain).toHaveBeenCalled();
 		expect(handlers.onMainMenu).toHaveBeenCalled();
+	});
+
+	test("backdrop is located behind all other onscreen elements and is the right color", () => {
+		const { find } = makeView();
+		const backdrop = find<Konva.Rect>("backdrop");
+
+		expect(backdrop).toBeDefined();
+		expect(backdrop.zIndex()).toBe(0);
+		expect(backdrop.fill()).toBe("lightblue");
+	});
+
+	test("keypad backdrop is rendered with correct components", () => {
+		const { find } = makeView();
+		const keysBackdrop = find<Konva.Ellipse>("keysBackdrop");
+
+		expect(keysBackdrop).toBeDefined();
+		expect(keysBackdrop.x()).toBe(STAGE_WIDTH / 2);
+		expect(keysBackdrop.radiusX()).toBe(STAGE_WIDTH / 1.5);
+		expect(keysBackdrop.fill()).toBe("lightgray");
+		expect(keysBackdrop.stroke()).toBe("black");
 	});
 });

@@ -38,14 +38,24 @@ const END_TEXT_COLOR = "white";
 const END_TL_CORNER_DIST = 5;
 
 // Keypad location constants
-//const SPEED_CHECK_RIGHT_ALIGN = 170;
-//const SPEED_CHECK_TOP_ALIGN = 400;
 const PAD_LEFT = 190;
 const PAD_TOP = 400;
 const PAD_KEY = 54;
 const PAD_SPACING = 2;
 const ACTION_WIDTH = 230;
 const ACTION_HEIGHT = 46;
+
+// Visual element constants
+const BACKDROP_HEIGHT = 1000;
+const BACKDROP_COLOR = "#e0abff";
+
+const KEY_BACKDROP_SEPERATION = 30;
+const KEY_BACKDROP_HEIGHT = 200;
+const KEY_BACKDROP_RADIUS = 20;
+const KEY_BACKDROP_STROKE_WIDTH = 15;
+
+const SHOP_IMAGE_SIZE = 400;
+const SHOP_IMAGE_KEY_SEPERATION = 30;
 
 /**
  * Ensures that the appropriate handler functions are passed into SpeedModeScreenView's convstructor
@@ -75,6 +85,41 @@ export class SpeedModeScreenView implements View {
         const foodScale = Math.min(0.85, STAGE_WIDTH * 0.30 / 290);
         foodGroup.scale({ x: foodScale, y: foodScale });
         this.group.add(foodGroup);
+
+        const screenBackdrop = new Konva.Rect({
+            name: "backdrop",
+            x: 0,
+            y: 0,
+            width: STAGE_WIDTH,
+            height: BACKDROP_HEIGHT,
+            fill: BACKDROP_COLOR,
+        });
+        this.group.add(screenBackdrop);
+
+        const answerKeysBackdrop = new Konva.Rect({
+            name: "keyBackdrop",
+            X: PAD_LEFT - KEY_BACKDROP_SEPERATION,
+            y: PAD_TOP - KEY_BACKDROP_SEPERATION,
+            width: STAGE_WIDTH,
+            height: KEY_BACKDROP_HEIGHT,
+            cornerRadius: KEY_BACKDROP_RADIUS,
+            fill: "lightgray",
+            stroke: "gray",
+            strokeWidth: KEY_BACKDROP_STROKE_WIDTH,
+        });
+        this.group.add(answerKeysBackdrop);
+
+        this.lineImage = null;
+        Konva.Image.fromURL("/cookie_line.png", (image) => {
+            image.width(SHOP_IMAGE_SIZE);
+            image.height(SHOP_IMAGE_SIZE / 2);
+            image.x(STAGE_WIDTH / 2);
+            image.y(PAD_TOP - (SHOP_IMAGE_SIZE / 2) - SHOP_IMAGE_KEY_SEPERATION);
+            image.listening(false);
+            image.id('lineImage');
+            this.group.add(image);
+            this.lineImage = image;
+        });
 
         const secondsText = new Konva.Text({
 			x: STAGE_WIDTH - LABEL_RIGHT_ALIGN,
@@ -150,10 +195,10 @@ export class SpeedModeScreenView implements View {
             keyColor: "#b44c10",
             keyBoarderColor: "#823001"
         });
+
         this.group.add(this.answerKeys);
 
         this.group.add(endButton.getGroup());
-        //this.group.add(checkButton.getGroup());
         this.group.add(secondsText);
         this.group.add(this.remainingTimeDisplay);
         this.group.add(scoreText);

@@ -25,6 +25,9 @@ const COLORS = {
 	buttonBorder: "#1f6e36",
 	menu: "#3b7dd8",
 	menuBorder: "#2a5aa0",
+	backdrop: "lightblue",
+	keyBackdrop: "lightgray",
+	keyBackdropBorder: "black",
 };
 
 const TEXT_WIDTH = 700;
@@ -48,6 +51,19 @@ const SUMMARY_BUTTON_WIDTH = 210;
 const SUMMARY_BUTTON_HEIGHT = 56;
 const SUMMARY_BUTTON_TOP = 430;
 const SUMMARY_BUTTON_GAP = 40;
+
+// Constants for decorative visuals
+const BACKDROP_HEIGHT = 1000;
+const KEY_BACKDROP_Y = 600;
+const KEY_BACKDROP_YRAD = 200;
+
+const BAKER_X = 300;
+const BAKER_Y = 200;
+const BAKER_SIZE = 400;
+
+const CAKE_X = 250;
+const CAKE_WIDTH = 500;
+const CAKE_HEIGHT = 300;
 
 interface AnswerBox {
 	readonly rect: Konva.Rect;
@@ -93,6 +109,46 @@ export class MasteryScreenView implements MasteryScreenViewPort {
 		this.countdownGroup.add(this.countdownRule, this.countdownNumber);
 
 		// Playing
+		const screenBackdrop = new Konva.Rect({
+			name: "backdrop",
+			x: 0,
+			y: 0,
+			width: STAGE_WIDTH,
+			height: BACKDROP_HEIGHT,
+			fill: COLORS.backdrop,
+		});
+
+		const answerKeysBackdrop = new Konva.Ellipse({
+			name: "keysBackdrop",
+			x: STAGE_WIDTH / 2,
+			y: KEY_BACKDROP_Y,
+			radiusX: STAGE_WIDTH / 1.5,
+			radiusY: KEY_BACKDROP_YRAD,
+			fill: COLORS.keyBackdrop,
+			stroke: COLORS.keyBackdropBorder,
+		});
+		this.playGroup.add(screenBackdrop);
+		this.playGroup.add(answerKeysBackdrop);
+
+		Konva.Image.fromURL("/baker_alright.png", (bakerImage) => {
+			bakerImage.x(BAKER_X);
+			bakerImage.y(BAKER_Y);
+			bakerImage.width(BAKER_SIZE);
+			bakerImage.height(BAKER_SIZE / 2);
+			bakerImage.listening(false);
+			this.playGroup.add(bakerImage);
+			bakerImage.name("baker-image");
+		});
+
+		Konva.Image.fromURL("/cake_plate_4+.png", (cakeImage) => {
+			cakeImage.x(CAKE_X);
+			cakeImage.y(0);
+			cakeImage.width(CAKE_WIDTH);
+			cakeImage.height(CAKE_HEIGHT);
+			cakeImage.listening(false);
+			this.playGroup.add(cakeImage);
+		});
+
 		this.problemNumberText = this.centeredText("", 20, 20, COLORS.muted, "normal", "problemNumber");
 		this.scoreText = new Konva.Text({
 			name: "scoreDisplay",
