@@ -1,7 +1,7 @@
 import { describe, expect, test, vi } from "vitest";
 import Konva from "konva";
 import { MenuScreenView } from "./MenuScreenView.ts";
-import { STAGE_WIDTH } from "../../constants.ts";
+import { STAGE_WIDTH, STAGE_HEIGHT } from "../../constants.ts";
 
 function makeHandlers() {
 	return {
@@ -16,10 +16,45 @@ describe("MenuScreenView", () => {
 		const view = new MenuScreenView(makeHandlers());
 		const title = view.getGroup().findOne<Konva.Text>(".title");
 		expect(title).toBeDefined();
-		expect(title!.text()).toBe("TEAM 16 GAME");
+		expect(title!.text()).toBe("FRIZZA");
 		expect(title!.x()).toBe(0);
 		expect(title!.width()).toBe(STAGE_WIDTH);
 		expect(title!.align()).toBe("center");
+	});
+
+	test("renders the background behind everything and lets clicks pass through", () => {
+		const view = new MenuScreenView(makeHandlers());
+		const background = view.getGroup().findOne<Konva.Image>(".background");
+		expect(background).toBeDefined();
+		expect(background!.zIndex()).toBe(0);
+		expect(background!.width()).toBe(STAGE_WIDTH);
+		expect(background!.height()).toBe(STAGE_HEIGHT);
+		expect(background!.listening()).toBe(false);
+	});
+
+	test("draws the oven fire above the background", () => {
+		const view = new MenuScreenView(makeHandlers());
+		const fire = view.getGroup().findOne(".ovenFire");
+		expect(fire).toBeDefined();
+		expect(fire!.zIndex()).toBe(1);
+	});
+
+	test("animates the oven fire only while the menu is shown", () => {
+		const view = new MenuScreenView(makeHandlers());
+		new Konva.Layer().add(view.getGroup());
+		view.show();
+		expect(view.getOvenFire().isRunning()).toBe(true);
+		view.hide();
+		expect(view.getOvenFire().isRunning()).toBe(false);
+	});
+
+	test("renders the subtitle centered across the stage", () => {
+		const view = new MenuScreenView(makeHandlers());
+		const subtitle = view.getGroup().findOne<Konva.Text>(".subtitle");
+		expect(subtitle!.text()).toBe("Fraction Pizzeria");
+		expect(subtitle!.x()).toBe(0);
+		expect(subtitle!.width()).toBe(STAGE_WIDTH);
+		expect(subtitle!.align()).toBe("center");
 	});
 
 	test("renders exactly three buttons in order: levels, mastery, speed", () => {

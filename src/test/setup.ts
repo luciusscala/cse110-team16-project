@@ -29,6 +29,9 @@ function createStubContext(canvas: HTMLCanvasElement): CanvasRenderingContext2D 
 					data: new Uint8ClampedArray(width * height * 4),
 				});
 			}
+			if (prop === "createLinearGradient" || prop === "createRadialGradient" || prop === "createPattern") {
+				return () => ({ addColorStop: () => {}, setTransform: () => {} });
+			}
 			return () => {};
 		},
 		set(target, prop, value) {
