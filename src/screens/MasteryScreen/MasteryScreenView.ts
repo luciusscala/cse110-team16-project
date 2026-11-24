@@ -2,6 +2,8 @@ import Konva from "konva";
 import { STAGE_WIDTH } from "../../constants.ts";
 import { Button } from "../../components/Button.ts";
 import { KeypadBuilder } from "../../components/Keypad.ts";
+import { FractionFoodVisual } from "../../visuals/FractionFoodVisual.ts";
+import type { FoodTile } from "../../visuals/FoodVisualState.ts";
 import type {
 	MasteryScreenHandlers,
 	MasteryScreenViewPort,
@@ -63,6 +65,11 @@ const CAKE_X = 250;
 const CAKE_WIDTH = 500;
 const CAKE_HEIGHT = 300;
 
+// Fixed centers for Mastery's food visuals (stage coordinates).
+const FOOD_FIRST_X = 76;
+const FOOD_SECOND_X = 210;
+const FOOD_CENTER_Y = 205;
+
 interface AnswerBox {
 	readonly rect: Konva.Rect;
 	readonly text: Konva.Text;
@@ -76,6 +83,7 @@ interface AnswerBox {
  * MasteryScreenController. This class only draws and forwards clicks.
  */
 export class MasteryScreenView implements MasteryScreenViewPort {
+	private readonly foodVisual = new FractionFoodVisual();
 	private readonly group = new Konva.Group({ visible: false });
 	private readonly countdownGroup = new Konva.Group({ name: "countdown" });
 	private readonly playGroup = new Konva.Group({ name: "play" });
@@ -126,6 +134,9 @@ export class MasteryScreenView implements MasteryScreenViewPort {
 		});
 		this.playGroup.add(screenBackdrop);
 		this.playGroup.add(answerKeysBackdrop);
+		// Keep the artwork loaded asynchronously behind the gameplay UI.
+		const artwork = new Konva.Group({ listening: false });
+		this.playGroup.add(artwork);
 
 		Konva.Image.fromURL("/baker_alright.png", (bakerImage) => {
 			bakerImage.x(BAKER_X);
@@ -133,7 +144,8 @@ export class MasteryScreenView implements MasteryScreenViewPort {
 			bakerImage.width(BAKER_SIZE);
 			bakerImage.height(BAKER_SIZE / 2);
 			bakerImage.listening(false);
-			this.playGroup.add(bakerImage);
+			artwork.add(bakerImage);
+			this.redraw();
 			bakerImage.name("baker-image");
 		});
 
@@ -143,7 +155,8 @@ export class MasteryScreenView implements MasteryScreenViewPort {
 			cakeImage.width(CAKE_WIDTH);
 			cakeImage.height(CAKE_HEIGHT);
 			cakeImage.listening(false);
-			this.playGroup.add(cakeImage);
+			artwork.add(cakeImage);
+			this.redraw();
 		});
 
 		this.problemNumberText = this.centeredText("", 20, 20, COLORS.muted, "normal", "problemNumber");
@@ -168,6 +181,7 @@ export class MasteryScreenView implements MasteryScreenViewPort {
 			this.equationText,
 			this.messageText,
 		);
+		this.playGroup.add(this.foodVisual.getGroup());
 		this.drawAnswerBoxes(handlers);
 		this.playGroup.add(
 			KeypadBuilder.buildAnswerKeys({
@@ -259,6 +273,12 @@ export class MasteryScreenView implements MasteryScreenViewPort {
 		this.countdownNumber.text(String(secondsLeft));
 		this.showOnly(this.countdownGroup);
 		this.redraw();
+	}
+
+	showFoodTiles(tiles: readonly FoodTile[], operator?: string): void {
+		this.foodVisual.renderFixedPair(
+			"cake", tiles, [FOOD_FIRST_X, FOOD_SECOND_X], FOOD_CENTER_Y, operator,
+		);
 	}
 
 	showProblem(equation: string, problemNumber: number): void {

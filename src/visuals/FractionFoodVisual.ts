@@ -3,6 +3,15 @@ import type { Fraction } from "../models/Fraction.ts";
 import type { BakeryFood, FoodTile } from "./FoodVisualState.ts";
 
 const MAX_VISIBLE_DIVISIONS = 24;
+const FOOD_RADIUS = 38;
+const WHOLE_GAP = 8;
+const PANEL_GAP = 24;
+const AREA_PADDING = 3;
+const CAPTION_FONT_SIZE = 18;
+const CAPTION_TOP = FOOD_RADIUS + 5;
+const FOOD_TOP = -FOOD_RADIUS - 1;
+const FOOD_BOTTOM = CAPTION_TOP + CAPTION_FONT_SIZE;
+const PANEL_HEIGHT = FOOD_BOTTOM - FOOD_TOP;
 
 const PIZZA = {
     pepperoniDistance: 0.59,
@@ -38,29 +47,233 @@ export class FractionFoodVisual {
         return this.group;
     }
 
-    /** Redraws fractions after the controller selects a solving phase. */
-    render(food: BakeryFood, tiles: readonly FoodTile[]): void {
+    /** Fits fixed-size food tiles into the reserved area without scaling the UI. */
+    renderInArea(
+        food: BakeryFood, tiles: readonly FoodTile[],
+        area: { x: number; y: number; width: number; height: number },
+        layout: "horizontal" | "vertical" = "horizontal",
+        operator?: string,
+    ): void {
         this.group.destroyChildren();
-        const positions = tiles.length === 1 ? [350] : [180, 520];
-        
-        tiles.forEach((tile, i) => {
-            const panel = new Konva.Group({ x: positions[i] ?? 350, y: 80, listening: false });
-            panel.add(new Konva.Text({
-                x: -145, y: -69, width: 290, align: "center",
-                text: tile.label, fontSize: 18, fontFamily: "Arial", fill: "#303030",
+        this.group.position({ x: area.x, y: area.y });
+        this.group.scale({ x: 1, y: 1 });
+        this.group.visible(false);
+
+        const panels = tiles.map((tile) => this.createPanel(food, tile));
+        const horizontal = layout === "horizontal";
+        const gap = panels.length > 1 ? PANEL_GAP : 0;
+        const width = area.width - 2 * AREA_PADDING;
+        const height = area.height - 2 * AREA_PADDING;
+        const redraw = () => this.group.getLayer()?.batchDraw();
+        if (panels.length === 0 || width <= 0 || height <= 0) {
+            redraw();
+            return;
+        }
+
+        const panelWidth = (panel: Konva.Group): number => {
+            const bounds = panel.getClientRect({ relativeTo: panel });
+            // Keep a consistent minimum slot width for ordinary fractions.
+            return 2 * Math.max(FOOD_RADIUS + 1, -bounds.x, bounds.x + bounds.width);
+        };
+        const requiredWidth = (): number => horizontal
+            ? panels.reduce((sum, panel) => sum + panelWidth(panel), 0)
+                + gap * (panels.length - 1)
+            : Math.max(...panels.map(panelWidth));
+        const requiredHeight = horizontal ? PANEL_HEIGHT
+            : PANEL_HEIGHT * panels.length + gap * (panels.length - 1);
+
+        // If several whole foods will not fit, retain their exact fraction
+        // caption rather than shrinking the drawings or covering other UI.
+        const removeDrawing = (panel: Konva.Group): void => {
+            panel.findOne(".fraction-food")?.destroy();
+            const caption = panel.findOne<Konva.Text>(".fraction-caption");
+            if (caption) caption.y(-caption.height() / 2);
+        };
+        if (requiredWidth() > width) {
+            const widerPanels = panels.filter((panel) =>
+                panelWidth(panel) > 2 * (FOOD_RADIUS + 1)
+            ).sort((a, b) => panelWidth(b) - panelWidth(a));
+            for (const panel of widerPanels) {
+                if (requiredWidth() <= width) break;
+                removeDrawing(panel);
+            }
+        }
+
+        // On very tight layouts, use captions alone at their original size.
+        // Never scale the foods based on the numerator or denominator.
+        const captionOnly = requiredWidth() > width || requiredHeight > height;
+        if (captionOnly) panels.forEach(removeDrawing);
+        const widths = panels.map((panel) => {
+            if (!captionOnly) return panelWidth(panel);
+            const bounds = panel.getClientRect({ relativeTo: panel });
+            return 2 * Math.max(-bounds.x, bounds.x + bounds.width, 1);
+        });
+        const tileHeight = captionOnly ? Math.max(CAPTION_FONT_SIZE, operator && panels.length === 2 ? gap : 0) : PANEL_HEIGHT;
+        const totalWidth = horizontal
+            ? widths.reduce((sum, w) => sum + w, 0) + gap * (panels.length - 1)
+            : Math.max(...widths);
+        const totalHeight = horizontal ? tileHeight
+            : tileHeight * panels.length + gap * (panels.length - 1);
+        if (totalWidth > width || totalHeight > height) {
+            panels.forEach((panel) => panel.destroy());
+            redraw();
+            return;
+        }
+
+        const offsetY = AREA_PADDING + (height - totalHeight) / 2;
+        const baseline = captionOnly ? tileHeight / 2 : -FOOD_TOP;
+        let cursor = AREA_PADDING;
+        panels.forEach((panel, index) => {
+            const x = horizontal ? cursor + widths[index] / 2 : area.width / 2;
+            const y = offsetY + baseline + (horizontal ? 0 : index * (tileHeight + gap));
+            panel.position({ x, y });
+            this.group.add(panel);
+            cursor += widths[index] + gap;
+        });
+
+        if (operator && panels.length === 2) {
+            this.group.add(new Konva.Text({
+                x: horizontal ? AREA_PADDING + widths[0] : area.width / 2 - gap / 2,
+                y: horizontal ? offsetY + baseline - gap / 2 : offsetY + tileHeight,
+                width: gap,
+                height: gap,
+                text: operator,
+                fontSize: 22,
+                fontStyle: "bold",
+                fontFamily: "Arial",
+                fill: "#303030",
+                align: "center",
+                verticalAlign: "middle",
+                listening: false,
             }));
-            
-            drawFraction(panel, tile.fraction, food);
-            
+        }
+        this.group.visible(true);
+        redraw();
+    }
+
+    /** Fixed horizontal pair: identical radius, centers, and spacing for every problem. */
+    renderFixedPair(
+        food: BakeryFood,
+        tiles: readonly FoodTile[],
+        centers: readonly [number, number],
+        centerY: number,
+        operator?: string,
+    ): void {
+        this.group.destroyChildren();
+        this.group.position({ x: 0, y: 0 });
+        this.group.scale({ x: 1, y: 1 });
+        this.group.visible(true);
+
+        const captionWidth = Math.abs(centers[1] - centers[0]) - 12;
+        tiles.slice(0, 2).forEach((tile, index) => {
+            const panel = new Konva.Group({
+                x: centers[index], y: centerY, listening: false,
+            });
+            const { numerator, denominator } = tile.fraction;
+            let mixedCaption: string | undefined;
+            if (Number.isInteger(numerator) && numerator >= 0 &&
+                Number.isInteger(denominator) && denominator > 0) {
+                const whole = Math.floor(numerator / denominator);
+                const remainder = numerator % denominator;
+                const selected = numerator > denominator
+                    ? (remainder || denominator) : numerator;
+                drawRoundFood(panel, 0, 0, FOOD_RADIUS, denominator, selected, food);
+                if (numerator > denominator) {
+                    const foodName = food === "cake" ? "whole cakes"
+                        : food === "cookie" ? "whole cookies" : "whole pizzas";
+                    mixedCaption = remainder === 0
+                        ? `${whole} ${foodName}`
+                        : `${whole} whole + ${remainder}/${denominator}`;
+                }
+            }
             panel.add(new Konva.Text({
-                x: -110, y: 57, width: 220, align: "center",
-                text: `${tile.fraction.numerator}/${tile.fraction.denominator}`,
-                fontSize: 22, fontStyle: "bold", fontFamily: "Arial", fill: "#242424",
+                x: -captionWidth / 2, y: CAPTION_TOP,
+                width: captionWidth, align: "center", wrap: "none",
+                text: `${numerator}/${denominator}`,
+                fontSize: CAPTION_FONT_SIZE, fontStyle: "bold",
+                fontFamily: "Arial", fill: "#242424", listening: false,
             }));
+            if (mixedCaption) {
+                panel.add(new Konva.Text({
+                    x: -captionWidth / 2, y: CAPTION_TOP + CAPTION_FONT_SIZE + 3,
+                    width: captionWidth, align: "center", wrap: "none",
+                    text: mixedCaption, fontSize: 14,
+                    fontFamily: "Arial", fill: "#242424", listening: false,
+                }));
+            }
             this.group.add(panel);
         });
-        
+
+        if (operator && tiles.length === 2) {
+            this.group.add(new Konva.Text({
+                x: (centers[0] + centers[1]) / 2 - PANEL_GAP / 2,
+                y: centerY - PANEL_GAP / 2,
+                width: PANEL_GAP, height: PANEL_GAP,
+                text: operator, fontSize: 22, fontStyle: "bold",
+                fontFamily: "Arial", fill: "#303030",
+                align: "center", verticalAlign: "middle", listening: false,
+            }));
+        }
         this.group.getLayer()?.batchDraw();
+    }
+
+    /** Mastery only: fixed operand centers, radius, and operator position. */
+    renderFixedCakePair(
+        tiles: readonly FoodTile[],
+        centers: readonly [number, number],
+        centerY: number,
+        operator?: string,
+    ): void {
+        this.renderFixedPair("cake", tiles, centers, centerY, operator);
+    }
+
+    /** Speed only: fixed operand centers, radius, and operator position. */
+    renderFixedCookiePair(
+        tiles: readonly FoodTile[],
+        centers: readonly [number, number],
+        centerY: number,
+        operator?: string,
+    ): void {
+        this.renderFixedPair("cookie", tiles, centers, centerY, operator);
+    }
+
+    /** Draws fixed-size fractions in an unconstrained layout. */
+    render(food: BakeryFood, tiles: readonly FoodTile[], layout: "horizontal" | "vertical" = "horizontal"): void {
+        this.group.destroyChildren();
+        this.group.visible(true);
+        let cursor = AREA_PADDING;
+        tiles.forEach((tile) => {
+            const panel = this.createPanel(food, tile);
+            const bounds = panel.getClientRect({ relativeTo: panel });
+            const halfWidth = Math.max(FOOD_RADIUS + 1, -bounds.x, bounds.x + bounds.width);
+            panel.position({
+                x: layout === "horizontal" ? cursor + halfWidth : 145,
+                y: layout === "vertical" ? cursor - FOOD_TOP : 80,
+            });
+            this.group.add(panel);
+            cursor += (layout === "horizontal" ? 2 * halfWidth : PANEL_HEIGHT) + PANEL_GAP;
+        });
+        this.group.getLayer()?.batchDraw();
+    }
+
+    private createPanel(food: BakeryFood, tile: FoodTile): Konva.Group {
+        const panel = new Konva.Group({ listening: false });
+        const drawing = new Konva.Group({ name: "fraction-food", listening: false });
+        drawFraction(drawing, tile.fraction, food);
+        panel.add(drawing);
+        const caption = new Konva.Text({
+            name: "fraction-caption",
+            y: drawing.getChildren().length > 0 ? CAPTION_TOP : -CAPTION_FONT_SIZE / 2,
+            text: `${tile.fraction.numerator}/${tile.fraction.denominator}`,
+            fontSize: CAPTION_FONT_SIZE,
+            fontStyle: "bold",
+            fontFamily: "Arial",
+            fill: "#242424",
+            listening: false,
+        });
+        caption.x(-caption.width() / 2);
+        panel.add(caption);
+        return panel;
     }
 }
 
@@ -68,19 +281,17 @@ function drawFraction(parent: Konva.Group, fraction: Fraction, food: BakeryFood)
     const { numerator, denominator } = fraction;
     if (!Number.isInteger(numerator) || numerator < 0 ||
         !Number.isInteger(denominator) || denominator <= 0) {
-        throw new Error("Fraction visuals require a nonnegative numerator and positive denominator");
+        // The fraction caption is still drawn by render().
+        return;
     }
     const wholeCount = Math.max(1, Math.ceil(numerator / denominator));
     
     if (wholeCount > 4) {
-        parent.add(new Konva.Text({
-            x: -135, y: -20, width: 270, align: "center", fontSize: 18,
-            text: `${numerator} of ${denominator} equal pieces`, fill: "#333",
-        }));
+        // Avoid overcrowding; the numerical fraction caption remains visible.
         return;
     }
-    const size = wholeCount === 1 ? 46 : Math.max(22, 46 - (wholeCount - 1) * 6);
-    const spacing = size * 2 + 8;
+    const size = FOOD_RADIUS;
+    const spacing = size * 2 + WHOLE_GAP;
     
     for (let whole = 0; whole < wholeCount; whole++) {
         const selected = Math.max(0, Math.min(denominator, numerator - whole * denominator));

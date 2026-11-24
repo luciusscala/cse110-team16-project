@@ -2,7 +2,7 @@ import { describe, expect, test } from "vitest";
 import { Fraction } from "../models/Fraction.ts";
 import type { Question } from "../models/level/LevelTypes.ts";
 import { computeExpectedSolution } from "../guided/GuidedSolutionModel.ts";
-import { getFoodTiles } from "./FoodVisualState.ts";
+import { getFoodTiles, getFoodOperator } from "./FoodVisualState.ts";
 
 const question: Question = {
     id: "L3-Q1", levelId: 3, frac1: new Fraction(1, 2),
@@ -31,8 +31,8 @@ describe("bakery fraction visual data", () => {
     test("does not reveal future steps without a solution", () => {
         expect(() => getFoodTiles(question, "combined")).toThrow();
     });
-    test("subtraction labels the second amount correctly", () => {
+    test("subtraction returns the correct operation symbol", () => {
         const subtractQuestion = { ...question, operation: "subtraction" as const };
-        expect(getFoodTiles(subtractQuestion, "original")[1].label).toBe("Take away");
+        expect(getFoodOperator(subtractQuestion.operation)).toBe("−");
     });
 });

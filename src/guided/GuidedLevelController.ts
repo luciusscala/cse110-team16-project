@@ -7,6 +7,7 @@ import type { ScreenSwitcher } from "../types.ts";
 import { AnswerEntryModel } from "./AnswerEntryModel.ts";
 import { parseStepAnswer } from "./answerParsing.ts";
 import { GuidedSolutionModel } from "./GuidedSolutionModel.ts";
+import { getFoodTiles, getFoodOperator, type VisualPhase } from "../visuals/FoodVisualState.ts";
 import type {
 	GuidedLevelViewFactory,
 	GuidedLevelViewPort,
@@ -121,8 +122,23 @@ export class GuidedLevelController extends ScreenController {
 			steps.indexOf(step),
 		);
 		this.refreshFields();
+		this.refreshFoodVisual();
 	}
 
+	private refreshFoodVisual() : void {
+		const { model } = this.requireActive();
+		const completed = model.getCompletedSteps();
+		const phase: VisualPhase = model.isComplete() ? "simplified"
+			: completed.includes("combine") ? "combined"
+			: completed.includes("scaleNumerators") ? "equivalent" : "original";
+		const operator = model.getCurrentStep() === "combine"
+			? getFoodOperator(model.getQuestion().operation)
+			: undefined;
+		this.view.showFoodTiles?.(
+			getFoodTiles(model.getQuestion(), phase, model.getSolution()),
+			operator,
+		);
+	}
 	/** Builds an empty entry sized for the model's current step. */
 	private makeEntry(model: GuidedSolutionModel): AnswerEntryModel {
 		const step = model.getCurrentStep();
@@ -188,6 +204,7 @@ export class GuidedLevelController extends ScreenController {
 		const { model } = this.requireActive();
 		const progress = this.requireLevelProgress();
 		this.questionComplete = true;
+		this.refreshFoodVisual();
 
 		const finalAnswer = model.getFinalAnswer();
 		this.view.showQuestionComplete(

@@ -4,6 +4,8 @@ import { STAGE_WIDTH } from "../../constants.ts";
 import { Button } from "../../components/Button.ts";
 import { KeypadBuilder } from "../../components/Keypad.ts";
 import { SPEED_MODE_TIME_LIMIT } from "../../constants.ts";
+import { FractionFoodVisual } from "../../visuals/FractionFoodVisual.ts";
+import type { FoodTile } from "../../visuals/FoodVisualState.ts";
 
 // General-use text constants
 const LABEL_RIGHT_ALIGN = 200;
@@ -55,6 +57,11 @@ const KEY_BACKDROP_STROKE_WIDTH = 15;
 const SHOP_IMAGE_SIZE = 400;
 const SHOP_IMAGE_KEY_SEPERATION = 30;
 
+// Fixed horizontal centers for Speed's food visuals (stage coordinates).
+const FOOD_FIRST_X = 76;
+const FOOD_SECOND_X = 210;
+const FOOD_CENTER_Y = 205;
+
 /**
  * Ensures that the appropriate handler functions are passed into SpeedModeScreenView's convstructor
  */
@@ -70,6 +77,7 @@ export interface SpeedModeScreenHandlers {
  */
 export class SpeedModeScreenView implements View {
     private group = Konva.group;
+    private readonly foodVisual = new FractionFoodVisual();
 
     /**
      * Creates the screen as it is when starting the Speech Challenge minigame.
@@ -77,7 +85,6 @@ export class SpeedModeScreenView implements View {
     constructor(handlers: SpeedModeScreenHandlers)
     {
         this.group = new Konva.Group({visible: true});
-
         const screenBackdrop = new Konva.Rect({
             name: "backdrop",
             x: 0,
@@ -101,6 +108,11 @@ export class SpeedModeScreenView implements View {
         });
         this.group.add(answerKeysBackdrop);
 
+        // Keep artwork behind the food visuals and gameplay UI.
+        const artwork = new Konva.Group({ listening: false });
+        this.group.add(artwork);
+        this.group.add(this.foodVisual.getGroup());
+
         this.lineImage = null;
         Konva.Image.fromURL("/cookie_line.png", (image) => {
             image.width(SHOP_IMAGE_SIZE);
@@ -109,7 +121,8 @@ export class SpeedModeScreenView implements View {
             image.y(PAD_TOP - (SHOP_IMAGE_SIZE / 2) - SHOP_IMAGE_KEY_SEPERATION);
             image.listening(false);
             image.id('lineImage');
-            this.group.add(image);
+            artwork.add(image);
+            this.group.getLayer()?.batchDraw();
             this.lineImage = image;
         });
 
@@ -195,6 +208,13 @@ export class SpeedModeScreenView implements View {
         this.group.add(this.remainingTimeDisplay);
         this.group.add(scoreText);
         this.group.add(this.scoreDisplay);
+    }
+
+    /** Displays the existing problem fractions at fixed horizontal positions. */
+    showFoodTiles(tiles: readonly FoodTile[], operator?: string): void {
+        this.foodVisual.renderFixedPair(
+            "cookie", tiles, [FOOD_FIRST_X, FOOD_SECOND_X], FOOD_CENTER_Y, operator,
+        );
     }
 
     /**

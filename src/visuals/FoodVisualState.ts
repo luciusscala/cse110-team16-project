@@ -12,7 +12,7 @@ export interface FoodTile {
 
 /** Returns only information appropriate to the step already reached. */
 export function getFoodTiles(
-    question: Question,
+    question: Pick<Question, "frac1" | "frac2" | "operation">,
     phase: VisualPhase,
     solution?: ExpectedSolution,
 ): readonly FoodTile[] {
@@ -44,4 +44,14 @@ export function getFoodTiles(
     }
     
     return [{ label: "Simplified amount", fraction: solution.simplified }];
+}
+
+/** Converts a problem's operation into the operation's symbol . */
+export function getFoodOperator(operation: string): string | undefined {
+    switch (operation) {
+        case "addition": return "+";
+        case "subtraction": return "−";
+        case "multiplication": return "×";
+        default: return undefined;
+    }
 }
