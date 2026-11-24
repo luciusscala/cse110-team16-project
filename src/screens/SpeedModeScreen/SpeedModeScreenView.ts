@@ -80,12 +80,6 @@ export class SpeedModeScreenView implements View {
     constructor(handlers: SpeedModeScreenHandlers)
     {
         this.group = new Konva.Group({visible: true});
-        const foodGroup = this.foodVisual.getGroup();
-        foodGroup.position({ x: 10, y: 75 });
-        const foodScale = Math.min(0.85, STAGE_WIDTH * 0.30 / 290);
-        foodGroup.scale({ x: foodScale, y: foodScale });
-        this.group.add(foodGroup);
-
         const screenBackdrop = new Konva.Rect({
             name: "backdrop",
             x: 0,
@@ -109,6 +103,11 @@ export class SpeedModeScreenView implements View {
         });
         this.group.add(answerKeysBackdrop);
 
+        // Keep artwork behind the food visuals and gameplay UI.
+        const artwork = new Konva.Group({ listening: false });
+        this.group.add(artwork);
+        this.group.add(this.foodVisual.getGroup());
+
         this.lineImage = null;
         Konva.Image.fromURL("/cookie_line.png", (image) => {
             image.width(SHOP_IMAGE_SIZE);
@@ -117,7 +116,8 @@ export class SpeedModeScreenView implements View {
             image.y(PAD_TOP - (SHOP_IMAGE_SIZE / 2) - SHOP_IMAGE_KEY_SEPERATION);
             image.listening(false);
             image.id('lineImage');
-            this.group.add(image);
+            artwork.add(image);
+            this.group.getLayer()?.batchDraw();
             this.lineImage = image;
         });
 
@@ -207,7 +207,15 @@ export class SpeedModeScreenView implements View {
 
     /** Displays the existing problem fractions as cookies. */
     showFoodTiles(tiles: readonly FoodTile[]): void {
-        this.foodVisual.render("cookie", tiles, "vertical");
+        const left = 12;
+        const top = SPEED_BUTTON_HEIGHT + END_TL_CORNER_DIST + 15;
+        const right = Math.min(STAGE_WIDTH / 2, STAGE_WIDTH - LABEL_RIGHT_ALIGN) - 12;
+        const bottom = PAD_TOP - KEY_BACKDROP_SEPERATION - KEY_BACKDROP_STROKE_WIDTH - 8;
+        this.foodVisual.renderInArea("cookie", tiles, {
+            x: left, y: top,
+            width: Math.max(0, right - left),
+            height: Math.max(0, bottom - top),
+        }, "vertical");
     }
 
     /**

@@ -38,6 +38,47 @@ export class FractionFoodVisual {
         return this.group;
     }
 
+    /** Fits food tiles inside a reserved area without resizing any other UI. */
+    renderInArea(
+        food: BakeryFood, tiles: readonly FoodTile[],
+        area: { x: number; y: number; width: number; height: number },
+        layout: "horizontal" | "vertical" = "horizontal",
+    ): void {
+        this.render(food, tiles, layout);
+        this.group.position({ x: area.x, y: area.y });
+        this.group.scale({ x: 1, y: 1 });
+        const panels = this.group.getChildren();
+        const columns = layout === "horizontal" ? Math.max(1, panels.length) : 1;
+        const rows = layout === "vertical" ? Math.max(1, panels.length) : 1;
+        const slotWidth = area.width / columns;
+        const slotHeight = area.height / rows;
+        this.group.visible(slotWidth > 8 && slotHeight > 8);
+
+        panels.forEach((panel, index) => {
+            if (!(panel instanceof Konva.Group)) return;
+            // Remove the wide invisible text boxes from the fit calculation.
+            panel.getChildren().forEach((child) => {
+                if (child instanceof Konva.Text) {
+                    child.width("auto");
+                    child.x(-child.width() / 2);
+                }
+            });
+            const bounds = panel.getClientRect({ relativeTo: panel });
+            const halfWidth = Math.max(-bounds.x, bounds.x + bounds.width, 1);
+            const halfHeight = Math.max(-bounds.y, bounds.y + bounds.height, 1);
+            const scale = Math.max(0, Math.min(1,
+                (slotWidth - 8) / (2 * halfWidth),
+                (slotHeight - 8) / (2 * halfHeight),
+            ));
+            panel.position({
+                x: (layout === "horizontal" ? index + 0.5 : 0.5) * slotWidth,
+                y: (layout === "vertical" ? index + 0.5 : 0.5) * slotHeight,
+            });
+            panel.scale({ x: scale, y: scale });
+        });
+        this.group.getLayer()?.batchDraw();
+    }
+
     /** Redraws fractions after the controller selects a solving phase. */
     render(food: BakeryFood, tiles: readonly FoodTile[], layout: "horizontal" | "vertical" = "horizontal"): void {
         this.group.destroyChildren();
