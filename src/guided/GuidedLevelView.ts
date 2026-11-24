@@ -37,7 +37,7 @@ export interface GuidedLevelHandlers {
  */
 export interface GuidedLevelViewPort extends View {
 	showQuestion(header: QuestionHeader): void;
-	showFoodTiles?(tiles: readonly FoodTile[]): void;
+	showFoodTiles?(tiles: readonly FoodTile[], operator?: string): void;
 	/** Shows a step's instruction and boxes, and where the player is in the steps. */
 	showStep(
 		prompt: StepPrompt,
@@ -97,6 +97,10 @@ const ACTION_LEFT = 470;
 const ACTION_WIDTH = 230;
 const ACTION_HEIGHT = 46;
 
+// Food visuals use only the empty space beside the answer content.
+const FOOD_LEFT = 12;
+const FOOD_GAP = 6;
+
 interface AnswerBox {
 	readonly rect: Konva.Rect;
 	readonly text: Konva.Text;
@@ -130,10 +134,7 @@ export class GuidedLevelView implements GuidedLevelViewPort {
 		this.equationText = this.addCenteredText("", 52, 40, COLORS.text);
 		this.feedbackText = this.addCenteredText("", 376, 20, COLORS.text);
 
-		const foodGroup = this.foodVisual.getGroup();
-		foodGroup.position({ x: 5, y: 255 });
-		foodGroup.scale({ x: 0.80, y: 0.80 });
-		this.group.add(foodGroup);
+		this.group.add(this.foodVisual.getGroup());
 		this.group.add(this.stepContent);
 		this.group.add(
 			new Button({
@@ -194,8 +195,36 @@ export class GuidedLevelView implements GuidedLevelViewPort {
 		return this.group;
 	}
 
-	showFoodTiles(tiles: readonly FoodTile[]): void {
-    	this.foodVisual.render("pizza", tiles, "horizontal");
+	showFoodTiles(tiles: readonly FoodTile[], operator?: string): void {
+		let top = BOXES_TOP - 4;
+		const bottom = this.feedbackText.y() - FOOD_GAP;
+		let right = STAGE_WIDTH / 2;
+		const children = this.stepContent.getChildren();
+		const bounds = children.map((node) =>
+			node.getClientRect({ relativeTo: this.stepContent }),
+		);
+
+		// Only tutorial text above the answers can lower the top boundary.
+		// Answer-box strokes may extend above BOXES_TOP, but must not lower it.
+		children.forEach((node, index) => {
+			if (node instanceof Konva.Text && node.y() < BOXES_TOP) {
+				const rect = bounds[index];
+				top = Math.max(top, rect.y + rect.height + FOOD_GAP);
+			}
+		});
+		// Keep the food to the left of all answer boxes and their labels.
+		for (const rect of bounds) {
+			if (rect.y < bottom && rect.y + rect.height > top) {
+				right = Math.min(right, rect.x - FOOD_GAP);
+			}
+		}
+
+		this.foodVisual.renderInArea("pizza", tiles, {
+			x: FOOD_LEFT,
+			y: top,
+			width: Math.max(0, right - FOOD_LEFT),
+			height: Math.max(0, bottom - top),
+		}, "horizontal", operator);
 	}
 
 	showQuestion(header: QuestionHeader): void {

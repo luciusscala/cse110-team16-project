@@ -65,11 +65,10 @@ const CAKE_X = 250;
 const CAKE_WIDTH = 500;
 const CAKE_HEIGHT = 300;
 
-// Reserved space to the left of the existing artwork and answer boxes.
-const FOOD_LEFT = 12;
-const FOOD_TOP = 145;
-const FOOD_BOTTOM = 290;
-const FOOD_GAP = 12;
+// Fixed centers for Mastery's food visuals (stage coordinates).
+const FOOD_FIRST_X = 76;
+const FOOD_SECOND_X = 210;
+const FOOD_CENTER_Y = 205;
 
 interface AnswerBox {
 	readonly rect: Konva.Rect;
@@ -276,15 +275,10 @@ export class MasteryScreenView implements MasteryScreenViewPort {
 		this.redraw();
 	}
 
-	showFoodTiles(tiles: readonly FoodTile[]): void {
-		const top = Math.max(FOOD_TOP,
-            this.equationText.y() + this.equationText.height() + FOOD_GAP);
-        const right = Math.min(CAKE_X, BAKER_X, (STAGE_WIDTH - BOX_WIDTH) / 2) - FOOD_GAP;
-        this.foodVisual.renderInArea("cake", tiles, {
-            x: FOOD_LEFT, y: top,
-            width: Math.max(0, right - FOOD_LEFT),
-            height: Math.max(0, FOOD_BOTTOM - top),
-        });
+	showFoodTiles(tiles: readonly FoodTile[], operator?: string): void {
+		this.foodVisual.renderFixedPair(
+			"cake", tiles, [FOOD_FIRST_X, FOOD_SECOND_X], FOOD_CENTER_Y, operator,
+		);
 	}
 
 	showProblem(equation: string, problemNumber: number): void {

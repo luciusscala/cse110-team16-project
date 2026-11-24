@@ -57,6 +57,11 @@ const KEY_BACKDROP_STROKE_WIDTH = 15;
 const SHOP_IMAGE_SIZE = 400;
 const SHOP_IMAGE_KEY_SEPERATION = 30;
 
+// Fixed horizontal centers for Speed's food visuals (stage coordinates).
+const FOOD_FIRST_X = 76;
+const FOOD_SECOND_X = 210;
+const FOOD_CENTER_Y = 205;
+
 /**
  * Ensures that the appropriate handler functions are passed into SpeedModeScreenView's convstructor
  */
@@ -205,17 +210,11 @@ export class SpeedModeScreenView implements View {
         this.group.add(this.scoreDisplay);
     }
 
-    /** Displays the existing problem fractions as cookies. */
-    showFoodTiles(tiles: readonly FoodTile[]): void {
-        const left = 12;
-        const top = SPEED_BUTTON_HEIGHT + END_TL_CORNER_DIST + 15;
-        const right = Math.min(STAGE_WIDTH / 2, STAGE_WIDTH - LABEL_RIGHT_ALIGN) - 12;
-        const bottom = PAD_TOP - KEY_BACKDROP_SEPERATION - KEY_BACKDROP_STROKE_WIDTH - 8;
-        this.foodVisual.renderInArea("cookie", tiles, {
-            x: left, y: top,
-            width: Math.max(0, right - left),
-            height: Math.max(0, bottom - top),
-        }, "vertical");
+    /** Displays the existing problem fractions at fixed horizontal positions. */
+    showFoodTiles(tiles: readonly FoodTile[], operator?: string): void {
+        this.foodVisual.renderFixedPair(
+            "cookie", tiles, [FOOD_FIRST_X, FOOD_SECOND_X], FOOD_CENTER_Y, operator,
+        );
     }
 
     /**
