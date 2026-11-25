@@ -118,6 +118,36 @@ describe("MenuScreenView", () => {
 		expect(view.getGroup().visible()).toBe(true);
 	});
 
+	test("shows a help icon in the top-right corner", () => {
+		const view = new MenuScreenView(makeHandlers());
+		const icon = view.getHelpIcon();
+		const circle = icon.findOne<Konva.Circle>("Circle")!;
+		expect(icon.findOne<Konva.Text>("Text")!.text()).toBe("?");
+		expect(icon.x() + circle.radius()).toBeLessThanOrEqual(STAGE_WIDTH);
+		expect(icon.x()).toBeGreaterThan(STAGE_WIDTH / 2);
+		expect(icon.y()).toBeLessThan(STAGE_HEIGHT / 4);
+	});
+
+	test("clicking the help icon opens How to Play without triggering any menu button", () => {
+		const handlers = makeHandlers();
+		const view = new MenuScreenView(handlers);
+		new Konva.Layer().add(view.getGroup());
+		view.getGroup().findOne(".helpButton")!.fire("click");
+		expect(view.getHowToPlayPopup().isOpen()).toBe(true);
+		expect(handlers.onLevelsClick).not.toHaveBeenCalled();
+		expect(handlers.onMasteryClick).not.toHaveBeenCalled();
+		expect(handlers.onSpeedClick).not.toHaveBeenCalled();
+	});
+
+	test("leaving the menu closes the How to Play popup", () => {
+		const view = new MenuScreenView(makeHandlers());
+		new Konva.Layer().add(view.getGroup());
+		view.getHowToPlayPopup().open();
+		view.hide();
+		view.show();
+		expect(view.getHowToPlayPopup().isOpen()).toBe(false);
+	});
+
 	test("show and hide redraw the layer when attached to one", () => {
 		const layer = new Konva.Layer();
 		const drawSpy = vi.spyOn(layer, "draw").mockImplementation(() => layer);
