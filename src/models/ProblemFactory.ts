@@ -51,8 +51,8 @@ export class ProblemFactory {
      * denominators. 
      */
     createLevel3Problem(type: ProblemType): Problem {
-        const denominator1 = this.getRandomInt(6, 15);
-        const denominator2 = this.getRandomInt(6, 15);
+        denominator1 = this.getRandomInt(6, 15);
+        denominator2 = this.getRandomInt(6, 15);
         while(denominator1 === denominator2){
             denominator2 = this.getRandomInt(6, 15);
         }
@@ -67,8 +67,8 @@ export class ProblemFactory {
      * denominators. 
      */
     createLevel4Problem(type: ProblemType): Problem {
-        const denominator1 = this.getRandomInt(15, 30);
-        const denominator2 = this.getRandomInt(15, 30);
+        denominator1 = this.getRandomInt(15, 30);
+        denominator2 = this.getRandomInt(15, 30);
         while(denominator1 === denominator2){
             denominator2 = this.getRandomInt(15, 30);
         }
