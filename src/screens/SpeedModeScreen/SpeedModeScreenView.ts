@@ -57,6 +57,14 @@ const KEY_BACKDROP_STROKE_WIDTH = 15;
 const SHOP_IMAGE_SIZE = 400;
 const SHOP_IMAGE_KEY_SEPERATION = 30;
 
+// Pre-game countdown, laid out like Mastery's
+const COUNTDOWN_TITLE_Y = 70;
+const COUNTDOWN_TITLE_SIZE = 40;
+const COUNTDOWN_RULE_Y = 150;
+const COUNTDOWN_RULE_SIZE = 26;
+const COUNTDOWN_NUMBER_Y = 260;
+const COUNTDOWN_NUMBER_SIZE = 120;
+
 // Fixed horizontal centers for Speed's food visuals (stage coordinates).
 const FOOD_FIRST_X = 76;
 const FOOD_SECOND_X = 210;
@@ -78,6 +86,9 @@ export interface SpeedModeScreenHandlers {
 export class SpeedModeScreenView implements View {
     private group = Konva.group;
     private readonly foodVisual = new FractionFoodVisual();
+    private countdownGroup: Konva.Group;
+    private countdownRule: Konva.Text;
+    private countdownNumber: Konva.Text;
 
     /**
      * Creates the screen as it is when starting the Speech Challenge minigame.
@@ -203,6 +214,22 @@ export class SpeedModeScreenView implements View {
 
         this.group.add(this.answerKeys);
 
+        // Countdown covers the play area before the timer starts; End stays on top of it
+        this.countdownGroup = new Konva.Group({ name: "countdown", visible: false });
+        this.countdownGroup.add(new Konva.Rect({
+            x: 0,
+            y: 0,
+            width: STAGE_WIDTH,
+            height: BACKDROP_HEIGHT,
+            fill: BACKDROP_COLOR,
+        }));
+        this.countdownGroup.add(this.centeredText("Speed", COUNTDOWN_TITLE_Y, COUNTDOWN_TITLE_SIZE, "bold"));
+        this.countdownRule = this.centeredText("", COUNTDOWN_RULE_Y, COUNTDOWN_RULE_SIZE, "normal", "countdownRule");
+        this.countdownNumber = this.centeredText("", COUNTDOWN_NUMBER_Y, COUNTDOWN_NUMBER_SIZE, "bold", "countdownNumber");
+        this.countdownNumber.fill(TIME_COLOR);
+        this.countdownGroup.add(this.countdownRule, this.countdownNumber);
+        this.group.add(this.countdownGroup);
+
         this.group.add(endButton.getGroup());
         this.group.add(secondsText);
         this.group.add(this.remainingTimeDisplay);
@@ -215,6 +242,46 @@ export class SpeedModeScreenView implements View {
         this.foodVisual.renderFixedPair(
             "cookie", tiles, [FOOD_FIRST_X, FOOD_SECOND_X], FOOD_CENTER_Y, operator,
         );
+    }
+
+    /**
+     * Shows the pre-game countdown over the play area.
+     * @param secondsLeft the number shown in large text (3, 2, 1)
+     * @param rule a reminder shown above the number, such as the lowest-terms rule
+     */
+    showCountdown(secondsLeft: number, rule: string): void {
+        this.countdownRule.text(rule);
+        this.countdownNumber.text(String(secondsLeft));
+        this.countdownGroup.visible(true);
+        this.group.getLayer()?.draw();
+    }
+
+    /**
+     * Hides the pre-game countdown, revealing the play area.
+     */
+    hideCountdown(): void {
+        this.countdownGroup.visible(false);
+        this.group.getLayer()?.draw();
+    }
+
+    isCountdownVisible(): boolean {
+        return this.countdownGroup.visible();
+    }
+
+    private centeredText(text: string, y: number, fontSize: number, fontStyle: string, name?: string): Konva.Text {
+        return new Konva.Text({
+            x: 0,
+            y,
+            width: STAGE_WIDTH,
+            text,
+            fontSize,
+            fontStyle,
+            fontFamily: SPEED_FONT,
+            fill: LABEL_COLOR,
+            align: "center",
+            name,
+            listening: false,
+        });
     }
 
     /**

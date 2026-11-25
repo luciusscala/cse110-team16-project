@@ -1,5 +1,5 @@
 import Konva from "konva";
-import { STAGE_WIDTH, STAGE_HEIGHT, MASTERY_COUNTDOWN_SECONDS, SPEED_MODE_TIME_LIMIT } from "../../constants.ts";
+import { STAGE_WIDTH, STAGE_HEIGHT, MASTERY_COUNTDOWN_SECONDS, SPEED_COUNTDOWN_SECONDS, SPEED_MODE_TIME_LIMIT } from "../../constants.ts";
 import { Button } from "../../components/Button.ts";
 import {
 	TOMATO_RED,
@@ -79,8 +79,10 @@ export const HOW_TO_PLAY_SECTIONS: readonly InstructionSection[] = [
 			{
 				heading: "How to answer",
 				body:
-					"Solve as many fraction problems as you can. Type your answer with the number pad " +
-					"and press Check to submit it. Press Delete to fix a mistake.",
+					`After a ${SPEED_COUNTDOWN_SECONDS}-second countdown, solve as many fraction problems as you can. ` +
+					"Type your answer with the number pad and press Check to submit it. " +
+					"Press Delete to fix a mistake.\n" +
+					"Answers must be in lowest terms: write 1/2, not 2/4.",
 			},
 			{
 				heading: "Scoring",
