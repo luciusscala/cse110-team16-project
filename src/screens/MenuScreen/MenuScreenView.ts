@@ -4,17 +4,18 @@ import { STAGE_WIDTH, STAGE_HEIGHT } from "../../constants.ts";
 import { Button } from "../../components/Button.ts";
 import backgroundUrl from "../../assets/menu-background.svg";
 import { OvenFire } from "./OvenFire.ts";
+import { HowToPlayPopup } from "./HowToPlayPopup.ts";
+import { TOMATO_RED, CHEESE_YELLOW, OUTLINE_BROWN, TITLE_FONT } from "./menuTheme.ts";
 
 const BUTTON_WIDTH = 300;
 const BUTTON_HEIGHT = 60;
 const BUTTON_START_Y = 235;
 const BUTTON_SPACING = 80;
 
-// Pizza shop palette, shared with the background art
-const TOMATO_RED = "#d9412b";
-const CHEESE_YELLOW = "#ffd45c";
-const OUTLINE_BROWN = "#4a2511";
-const TITLE_FONT = '"Arial Black", Arial, sans-serif';
+// Help icon in the top-right corner
+const HELP_ICON_RADIUS = 24;
+const HELP_ICON_MARGIN = 20;
+const HELP_ICON_HOVER_SCALE = 1.1;
 
 export interface MenuScreenHandlers {
 	onLevelsClick: () => void;
@@ -22,25 +23,24 @@ export interface MenuScreenHandlers {
 	onSpeedClick: () => void;
 }
 
-/**
- * MenuScreenView - Renders the menu screen
- */
 export class MenuScreenView implements View {
 	private group: Konva.Group;
 	private buttons: Button[];
 	private ovenFire: OvenFire;
+	private helpIcon: Konva.Group;
+	private howToPlay: HowToPlayPopup;
 
 	constructor(handlers: MenuScreenHandlers) {
 		this.group = new Konva.Group({ visible: true });
 
-		// Background art goes first so it's drawn behind everything else
+	
 		this.group.add(this.createBackground());
 
-		// Animated fire sits on top of the background, inside the oven opening
+		
 		this.ovenFire = new OvenFire();
 		this.group.add(this.ovenFire.getGroup());
 
-		// Title text, spanning the stage width so align centers it
+		
 		const title = new Konva.Text({
 			x: 0,
 			y: 115,
@@ -93,12 +93,69 @@ export class MenuScreenView implements View {
 				}),
 		);
 		this.buttons.forEach((button) => this.group.add(button.getGroup()));
+
+		// Help icon and its popup. The popup goes last so it draws over everything.
+		this.helpIcon = this.createHelpIcon();
+		this.group.add(this.helpIcon);
+		this.howToPlay = new HowToPlayPopup();
+		this.group.add(this.howToPlay.getGroup());
 	}
 
-	/**
-	 * Full-stage background image. The SVG loads asynchronously, so the node
-	 * starts empty and the layer is redrawn once the image is ready.
-	 */
+	
+	private createHelpIcon(): Konva.Group {
+		const icon = new Konva.Group({
+			x: STAGE_WIDTH - HELP_ICON_MARGIN - HELP_ICON_RADIUS,
+			y: HELP_ICON_MARGIN + HELP_ICON_RADIUS,
+			name: "helpButton",
+		});
+		icon.add(
+			new Konva.Circle({
+				radius: HELP_ICON_RADIUS,
+				fill: CHEESE_YELLOW,
+				stroke: OUTLINE_BROWN,
+				strokeWidth: 4,
+				shadowColor: "black",
+				shadowOpacity: 0.35,
+				shadowBlur: 6,
+				shadowOffsetY: 2,
+			}),
+			new Konva.Text({
+				x: -HELP_ICON_RADIUS,
+				y: -HELP_ICON_RADIUS,
+				width: HELP_ICON_RADIUS * 2,
+				height: HELP_ICON_RADIUS * 2,
+				text: "?",
+				fontSize: 30,
+				fontFamily: TITLE_FONT,
+				fill: OUTLINE_BROWN,
+				align: "center",
+				verticalAlign: "middle",
+				listening: false,
+			}),
+		);
+
+		icon.on("click tap", () => this.howToPlay.open());
+		icon.on("mouseenter", () => {
+			icon.scale({ x: HELP_ICON_HOVER_SCALE, y: HELP_ICON_HOVER_SCALE });
+			this.setCursor("pointer");
+			icon.getLayer()?.batchDraw();
+		});
+		icon.on("mouseleave", () => {
+			icon.scale({ x: 1, y: 1 });
+			this.setCursor("default");
+			icon.getLayer()?.batchDraw();
+		});
+		return icon;
+	}
+
+	private setCursor(cursor: string): void {
+		const container = this.group.getStage()?.container();
+		if (container) {
+			container.style.cursor = cursor;
+		}
+	}
+
+
 	private createBackground(): Konva.Image {
 		const background = new Konva.Image({
 			x: 0,
@@ -120,19 +177,17 @@ export class MenuScreenView implements View {
 		return background;
 	}
 
-	/**
-	 * Show the screen
-	 */
+	
 	show(): void {
 		this.group.visible(true);
 		this.ovenFire.start();
 		this.group.getLayer()?.draw();
 	}
 
-	/**
-	 * Hide the screen
-	 */
+	
 	hide(): void {
+		
+		this.howToPlay.close();
 		this.group.visible(false);
 		this.ovenFire.stop();
 		this.group.getLayer()?.draw();
@@ -148,5 +203,13 @@ export class MenuScreenView implements View {
 
 	getButtons(): Button[] {
 		return this.buttons;
+	}
+
+	getHelpIcon(): Konva.Group {
+		return this.helpIcon;
+	}
+
+	getHowToPlayPopup(): HowToPlayPopup {
+		return this.howToPlay;
 	}
 }
