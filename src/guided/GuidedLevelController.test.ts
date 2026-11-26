@@ -23,7 +23,6 @@ class FakeView implements GuidedLevelViewPort {
 	completion: { summary: string; isLastQuestion: boolean } | undefined;
 	questionsShown = 0;
 	hint: string | undefined;
-	hintCleared: false;
 
 	private readonly group = new Konva.Group();
 	getGroup(): Konva.Group {
@@ -59,7 +58,6 @@ class FakeView implements GuidedLevelViewPort {
 	}
 	clearHint(): void {
 		this.hint = undefined;
-		this.hintCleared = true;
 	}
 }
 
@@ -411,13 +409,21 @@ describe("GuidedLevelController", () => {
 			expect(h.view.hint).toBeDefined();
 		});
 
-		test("check button clears hint", () => {
+		test("a wrong answer keeps the hint on screen", () => {
 			h.controller.startLevel(1);
-			h.view.showHint("test hint");
-			h.handlers.onCheck();
+			h.handlers.onHintClick();
+			enter(h, 10);
 
+			expect(h.view.hint).toContain("Remember that pizza slices of");
+		});
+
+		test("a correct answer clears the hint", () => {
+			h.controller.startLevel(1);
+			h.handlers.onHintClick();
+			enter(h, 2, 3); // 1/3 + 1/3
+
+			expect(h.view.completion).toBeDefined();
 			expect(h.view.hint).toBeUndefined();
-			expect(h.view.hintCleared).toBe(true);
 		});
 		
 		test("3 incorrect answers triggers automatic general hint", () => {
@@ -453,7 +459,7 @@ describe("GuidedLevelController", () => {
 
 			enter(h, 13);
 			expect(h.view.feedback?.tone).toBe("tryAgain");
-			expect(h.view.hint).toBeUndefined();
+			expect(h.view.hint).toContain("Remember that pizza slices of");
 
 			enter(h, 14);
 			expect(h.view.feedback?.tone).toBe("tryAgain");

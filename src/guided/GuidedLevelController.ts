@@ -188,7 +188,6 @@ export class GuidedLevelController extends ScreenController {
 		const { model, entry } = this.requireActive();
 		const step = model.getCurrentStep();
 		if (step === undefined) return;
-		this.view.clearHint();
 
 		const parsed = parseStepAnswer(step, entry.getFields());
 		if (!parsed.ok) {
@@ -204,6 +203,8 @@ export class GuidedLevelController extends ScreenController {
 			return;
 		}
 
+		// Keep the hint up while the player is still stuck; it has done its job once they get it.
+		this.view.clearHint();
 		if (model.isComplete()) {
 			this.finishQuestion();
 		} else {
