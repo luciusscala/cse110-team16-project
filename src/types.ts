@@ -16,6 +16,7 @@ export interface View {
  * - "mastery": Mastery mode
  * - "speed": Speed minigame
  * - "guided": Step-by-step walkthrough of a guided campaign level
+ * - "campaignComplete": Congratulations after finishing the last campaign level
  */
 export type Screen =
     | { type: "menu" }
@@ -23,6 +24,7 @@ export type Screen =
     | { type: "mastery" }
     | { type: "speed" }
     | { type: "guided"; levelId: number }
+    | { type: "campaignComplete" }
 	| { type: "gameOver";
     	gameId: MinigameId;
     	score: number;

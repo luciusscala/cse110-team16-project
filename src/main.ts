@@ -9,6 +9,7 @@ import { SpeedModeScreenController } from "./screens/SpeedModeScreen/SpeedModeSc
 import { SpeedModeScreenView } from "./screens/SpeedModeScreen/SpeedModeScreenView.ts";
 import { MasteryScreenController } from "./screens/MasteryScreen/MasteryScreenController.ts";
 import { GameOverScreenController } from "./screens/GameOverScreen/GameOverScreenController.ts";
+import { CampaignCompleteScreenController } from "./screens/CampaignCompleteScreen/CampaignCompleteScreenController.ts";
 
 /**
  * Main Application - Coordinates all screens
@@ -27,6 +28,7 @@ class App implements ScreenSwitcher {
 	private speedModeController: SpeedModeScreenController;
 	private masteryController: MasteryScreenController;
 	private gameOverController: GameOverScreenController;
+	private campaignCompleteController: CampaignCompleteScreenController;
 
 	constructor(container: string) {
 		// Initialize Konva stage (the main canvas)
@@ -50,6 +52,7 @@ class App implements ScreenSwitcher {
 		this.speedModeController = new SpeedModeScreenController(this);
 		this.masteryController = new MasteryScreenController(this);
 		this.gameOverController = new GameOverScreenController(this);
+		this.campaignCompleteController = new CampaignCompleteScreenController(this);
 		
 		// Add all screen groups to the layer
 		this.layer.add(this.menuController.getView().getGroup());
@@ -58,6 +61,7 @@ class App implements ScreenSwitcher {
 		this.layer.add(this.speedModeController.getView().getGroup());
 		this.layer.add(this.masteryController.getView().getGroup());
 		this.layer.add(this.gameOverController.getView().getGroup());
+		this.layer.add(this.campaignCompleteController.getView().getGroup());
 		
 
 		// Draw the layer (render everything to the canvas)
@@ -80,6 +84,7 @@ class App implements ScreenSwitcher {
 		this.speedModeController.hide();
 		this.masteryController.hide();
 		this.gameOverController.hide();
+		this.campaignCompleteController.hide();
 
 		// Show the requested screen based on the screen type
 		switch (screen.type) {
@@ -111,6 +116,9 @@ class App implements ScreenSwitcher {
     			this.gameOverController.showResults(screen.gameId, screen.score, screen.summary);
     			this.gameOverController.show();
     			break;
+			case "campaignComplete":
+				this.campaignCompleteController.show();
+				break;
 		}
 	}
 }

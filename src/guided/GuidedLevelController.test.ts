@@ -386,7 +386,7 @@ describe("GuidedLevelController", () => {
 	});
 
 	describe("every guided level can be played to the end", () => {
-		test.each([1, 2, 3])("level %i", (levelId) => {
+		test.each([1, 2, 3, 4, 5, 6])("level %i", (levelId) => {
 			const spy = vi.spyOn(ProgressManager, "increaseProgressTo");
 			h.controller.startLevel(levelId);
 			const total = h.view.header!.questionCount;
@@ -398,6 +398,23 @@ describe("GuidedLevelController", () => {
 				h.handlers.onContinue();
 			}
 			expect(spy).toHaveBeenCalledWith(levelId);
+			expect(h.screens).toEqual([{ type: "menu" }]);
+		});
+
+		test("finishing the last level shows the congratulations screen", () => {
+			h.controller.startLevel(7);
+			const total = h.view.header!.questionCount;
+			for (let question = 0; question < total; question++) {
+				solveCurrentQuestion(h);
+				h.handlers.onContinue();
+			}
+			expect(ProgressManager.getUserProgress()).toBe(7);
+			expect(h.screens).toEqual([{ type: "campaignComplete" }]);
+		});
+
+		test("going back from the last level still returns to the menu", () => {
+			h.controller.startLevel(7);
+			h.handlers.onBack();
 			expect(h.screens).toEqual([{ type: "menu" }]);
 		});
 	});
