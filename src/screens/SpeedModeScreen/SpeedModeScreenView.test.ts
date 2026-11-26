@@ -16,6 +16,7 @@ function makeHandlers()
         onKeyClick: vi.fn(),
         onCheckClick: vi.fn(),
         onBackspaceClick: vi.fn(),
+        onFieldSelected: vi.fn(),
     }
 }
 
@@ -196,5 +197,26 @@ describe("SpeedModeScreenView", () => {
         const view = new SpeedModeScreenView(makeHandlers());
 
         expect(view.lineImage).toBeDefined();
+    });
+
+    test("shows the problem, the typed answer and messages", () => {
+        const view = new SpeedModeScreenView(makeHandlers());
+        const find = <T extends Konva.Node>(name: string) => view.getGroup().findOne<T>(`.${name}`)!;
+
+        view.showProblem("1/2 + 1/4");
+        view.updateFields(["3", "4"], 1);
+        view.showMessage("Answer: 3/4");
+
+        expect(find<Konva.Text>("equation").text()).toBe("1/2 + 1/4 =");
+        expect(find<Konva.Group>("field-0").findOne<Konva.Text>("Text")!.text()).toBe("3");
+        expect(find<Konva.Group>("field-1").findOne<Konva.Text>("Text")!.text()).toBe("4");
+        expect(find<Konva.Text>("message").text()).toBe("Answer: 3/4");
+    });
+
+    test("clicking an answer box reports its index", () => {
+        const handlers = makeHandlers();
+        const view = new SpeedModeScreenView(handlers);
+        view.getGroup().findOne(".field-1")!.fire("click");
+        expect(handlers.onFieldSelected).toHaveBeenCalledWith(1);
     });
 });

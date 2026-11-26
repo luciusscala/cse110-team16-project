@@ -6,8 +6,6 @@ export interface MasteryScreenHandlers {
   onFieldSelected(index: number): void;
   onCheck(): void;
   onExit(): void;
-  onPlayAgain(): void;
-  onMainMenu(): void;
 }
 
 export interface MasterySummary {
@@ -26,7 +24,6 @@ export interface MasteryScreenViewPort extends View {
   updateFields(fields: readonly string[], activeIndex: number): void;
 
   showMessage(message: string): void;
-  showSummary(summary: MasterySummary): void;
 }
 
 export type MasteryScreenViewFactory = (
