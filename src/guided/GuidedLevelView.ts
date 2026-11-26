@@ -66,8 +66,8 @@ const COLORS = {
 	buttonBorder: "#1f6e36",
 	back: "#777777",
 	backBorder: "#555555",
-	hint: "#8c2036",
-	hintBorder: "#661021",
+	hint: "#d9534f",
+	hintBorder: "#a83a36",
 	boxBorder: "#999999",
 	boxActive: "#3b7dd8",
 	correct: "#1f8a3d",
@@ -202,7 +202,7 @@ export class GuidedLevelView implements GuidedLevelViewPort {
 			y: PAD_TOP,
 			width: ACTION_WIDTH,
 			height: ACTION_HEIGHT,
-			text: "Next question",
+			text: "Next Question",
 			fill: COLORS.button,
 			stroke: COLORS.buttonBorder,
 			fontSize: 22,
@@ -318,7 +318,7 @@ export class GuidedLevelView implements GuidedLevelViewPort {
 	showQuestionComplete(summary: string, isLastQuestion: boolean): void {
 		this.feedbackText.text(`${summary}  Great job!`);
 		this.feedbackText.fill(COLORS.correct);
-		this.continueLabel.text(isLastQuestion ? "Finish level" : "Next question");
+		this.continueLabel.text(isLastQuestion ? "Finish level" : "Next Question");
 		this.setAnswering(false);
 		this.redraw();
 	}

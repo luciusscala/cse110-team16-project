@@ -28,14 +28,16 @@ const SPEED_SCORE_DISPLAY_RIGHT_ALIGN = 100;
 const SPEED_SCORE_DISPLAY_TOP_ALIGN = 88;
 
 // General-use button constants
-const SPEED_BUTTON_WIDTH = 100;
-const SPEED_BUTTON_HEIGHT = 40;
-const END_COLOR = "red";
-const END_OUTLINE = "darkred";
+const SPEED_BUTTON_WIDTH = 90;
+const SPEED_BUTTON_HEIGHT = 34;
+const END_COLOR = "#d9534f";
+const END_OUTLINE = "#a83a36";
 const END_TEXT_COLOR = "white";
+const END_FONT_SIZE = 18;
 
 // End button location constants
-const END_TL_CORNER_DIST = 5;
+const END_TL_CORNER_DIST_X = 12;
+const END_TL_CORNER_DIST_Y = 10;
 
 // Keypad location constants
 const PAD_LEFT = 190;
@@ -47,7 +49,7 @@ const ACTION_HEIGHT = 46;
 
 // Visual element constants
 const BACKDROP_HEIGHT = 1000;
-const BACKDROP_COLOR = "#e0abff";
+const BACKDROP_COLOR = "#edc0e8";
 
 const KEY_BACKDROP_SEPERATION = 30;
 const KEY_BACKDROP_HEIGHT = 200;
@@ -175,13 +177,14 @@ export class SpeedModeScreenView implements View {
         });
 
         const endButton = new Button({
-            x: END_TL_CORNER_DIST,
-            y: END_TL_CORNER_DIST,
+            x: END_TL_CORNER_DIST_X,
+            y: END_TL_CORNER_DIST_Y,
             width: SPEED_BUTTON_WIDTH,
             height: SPEED_BUTTON_HEIGHT,
-            text: "End",
+            text: "Exit",
             onClick: handlers.onEndGameClick, 
             name: "endGameButton",
+            fontSize: END_FONT_SIZE,
             fill: END_COLOR,
             stroke: END_OUTLINE,
             textColor: END_TEXT_COLOR,
