@@ -41,6 +41,24 @@ describe("GameOverScreenController", () => {
         expect(displayedText(controller)).toContain("Personal best: 12");
     });
 
+    test("a Mastery game ended before any answer is shown but not recorded", () => {
+        const { controller } = makeController();
+        controller.showResults("masteryMode", 3, { title: "Game over!", correctCount: 3, incorrectCount: 1, detail: "" });
+        controller.showResults("masteryMode", 0, { title: "Game ended", correctCount: 0, incorrectCount: 0, detail: "" });
+
+        expect(new HighScoreModel().getLeaderboard("masteryMode").map((entry) => entry.score))
+            .toEqual([3]);
+        expect(displayedText(controller)).toContain("Your score: 0");
+    });
+
+    test("a Mastery game that ends on a wrong first answer still records its zero", () => {
+        const { controller } = makeController();
+        controller.showResults("masteryMode", 0, { title: "Game over!", correctCount: 0, incorrectCount: 1, detail: "" });
+
+        expect(new HighScoreModel().getLeaderboard("masteryMode").map((entry) => entry.score))
+            .toEqual([0]);
+    });
+
     test("keeps the higher personal best and ranks multiple attempts", () => {
         const { controller } = makeController();
         controller.showResults("speedMode", 10);
