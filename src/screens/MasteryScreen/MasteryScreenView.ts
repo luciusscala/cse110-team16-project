@@ -2,12 +2,12 @@ import Konva from "konva";
 import { STAGE_WIDTH } from "../../constants.ts";
 import { Button } from "../../components/Button.ts";
 import { KeypadBuilder } from "../../components/Keypad.ts";
+import { FractionAnswerBoxes } from "../../components/FractionAnswerBoxes.ts";
 import { FractionFoodVisual } from "../../visuals/FractionFoodVisual.ts";
 import type { FoodTile } from "../../visuals/FoodVisualState.ts";
 import type {
 	MasteryScreenHandlers,
 	MasteryScreenViewPort,
-	MasterySummary,
 } from "./MasteryScreenViewPort.ts";
 
 const FONT = "Arial";
@@ -16,15 +16,8 @@ const COLORS = {
 	muted: "#777777",
 	accent: "#3b7dd8",
 	correct: "#1f8a3d",
-	wrong: "#c2410c",
-	boxBorder: "#999999",
-	boxActive: "#3b7dd8",
 	exit: "#d9534f",
 	exitBorder: "#a83a36",
-	button: "#2e9e4f",
-	buttonBorder: "#1f6e36",
-	menu: "#3b7dd8",
-	menuBorder: "#2a5aa0",
 	backdrop: "lightblue",
 	keyBackdrop: "lightgray",
 	keyBackdropBorder: "black",
@@ -32,10 +25,7 @@ const COLORS = {
 
 const TEXT_WIDTH = 700;
 
-// Answer boxes: one fraction, top box over bottom box
-const BOX_WIDTH = 70;
-const BOX_HEIGHT = 44;
-const FRACTION_GAP = 10;
+// Top of the answer boxes (one fraction, top box over bottom box)
 const BOXES_TOP = 180;
 
 // Number pad, placed like the guided levels'
@@ -45,12 +35,6 @@ const PAD_KEY = 54;
 const PAD_SPACING = 8;
 const ACTION_WIDTH = 230;
 const ACTION_HEIGHT = 46;
-
-// End-game buttons
-const SUMMARY_BUTTON_WIDTH = 210;
-const SUMMARY_BUTTON_HEIGHT = 56;
-const SUMMARY_BUTTON_TOP = 430;
-const SUMMARY_BUTTON_GAP = 40;
 
 // Constants for decorative visuals
 const BACKDROP_HEIGHT = 1000;
@@ -70,16 +54,11 @@ const FOOD_FIRST_X = 76;
 const FOOD_SECOND_X = 210;
 const FOOD_CENTER_Y = 205;
 
-interface AnswerBox {
-	readonly rect: Konva.Rect;
-	readonly text: Konva.Text;
-}
-
 /**
- * MasteryScreenView - Draws the Mastery minigame: the countdown, one problem
- * at a time with the number pad, and the end-game summary.
+ * MasteryScreenView - Draws the Mastery minigame: the countdown, then one problem
+ * at a time with the number pad. (The end-of-game results are on the game over screen.)
  *
- * Only one of the three parts is visible at a time. All behaviour lives in
+ * Only one of the two parts is visible at a time. All behaviour lives in
  * MasteryScreenController. This class only draws and forwards clicks.
  */
 export class MasteryScreenView implements MasteryScreenViewPort {
@@ -87,8 +66,6 @@ export class MasteryScreenView implements MasteryScreenViewPort {
 	private readonly group = new Konva.Group({ visible: false });
 	private readonly countdownGroup = new Konva.Group({ name: "countdown" });
 	private readonly playGroup = new Konva.Group({ name: "play" });
-	private readonly summaryGroup = new Konva.Group({ name: "summary" });
-	private readonly exitButton: Konva.Group;
 
 	private readonly countdownNumber: Konva.Text;
 	private readonly countdownRule: Konva.Text;
@@ -97,15 +74,11 @@ export class MasteryScreenView implements MasteryScreenViewPort {
 	private readonly problemNumberText: Konva.Text;
 	private readonly equationText: Konva.Text;
 	private readonly messageText: Konva.Text;
-	private readonly boxes: AnswerBox[] = [];
+	private readonly answerBoxes: FractionAnswerBoxes;
 
-	private readonly summaryTitle: Konva.Text;
-	private readonly summaryCorrect: Konva.Text;
-	private readonly summaryIncorrect: Konva.Text;
-	private readonly summaryDetail: Konva.Text;
 
 	constructor(handlers: MasteryScreenHandlers) {
-		this.group.add(this.countdownGroup, this.playGroup, this.summaryGroup);
+		this.group.add(this.countdownGroup, this.playGroup);
 
 		// Countdown
 		this.countdownGroup.add(this.centeredText("Mastery", 70, 40, COLORS.text, "bold"));
@@ -182,7 +155,8 @@ export class MasteryScreenView implements MasteryScreenViewPort {
 			this.messageText,
 		);
 		this.playGroup.add(this.foodVisual.getGroup());
-		this.drawAnswerBoxes(handlers);
+		this.answerBoxes = new FractionAnswerBoxes(BOXES_TOP, handlers.onFieldSelected);
+		this.playGroup.add(this.answerBoxes.getGroup());
 		this.playGroup.add(
 			KeypadBuilder.buildAnswerKeys({
 				keySize: PAD_KEY,
@@ -198,7 +172,7 @@ export class MasteryScreenView implements MasteryScreenViewPort {
 		);
 
 		// Exit works during the countdown and while playing
-		this.exitButton = new Button({
+		const exitButton = new Button({
 			name: "exitButton",
 			x: 12,
 			y: 10,
@@ -210,46 +184,7 @@ export class MasteryScreenView implements MasteryScreenViewPort {
 			stroke: COLORS.exitBorder,
 			onClick: () => handlers.onExit(),
 		}).getGroup();
-		this.group.add(this.exitButton);
-
-		// End-game summary
-		this.summaryTitle = this.centeredText("", 80, 44, COLORS.text, "bold", "summaryTitle");
-		this.summaryCorrect = this.centeredText("", 180, 28, COLORS.correct, "normal", "summaryCorrect");
-		this.summaryIncorrect = this.centeredText("", 225, 28, COLORS.wrong, "normal", "summaryIncorrect");
-		this.summaryDetail = this.centeredText("", 290, 22, COLORS.text, "normal", "summaryDetail");
-		this.summaryGroup.add(
-			this.summaryTitle,
-			this.summaryCorrect,
-			this.summaryIncorrect,
-			this.summaryDetail,
-		);
-
-		const buttonsLeft =
-			(STAGE_WIDTH - SUMMARY_BUTTON_WIDTH * 2 - SUMMARY_BUTTON_GAP) / 2;
-		this.summaryGroup.add(
-			new Button({
-				name: "playAgainButton",
-				x: buttonsLeft,
-				y: SUMMARY_BUTTON_TOP,
-				width: SUMMARY_BUTTON_WIDTH,
-				height: SUMMARY_BUTTON_HEIGHT,
-				text: "Play again",
-				fill: COLORS.button,
-				stroke: COLORS.buttonBorder,
-				onClick: () => handlers.onPlayAgain(),
-			}).getGroup(),
-			new Button({
-				name: "mainMenuButton",
-				x: buttonsLeft + SUMMARY_BUTTON_WIDTH + SUMMARY_BUTTON_GAP,
-				y: SUMMARY_BUTTON_TOP,
-				width: SUMMARY_BUTTON_WIDTH,
-				height: SUMMARY_BUTTON_HEIGHT,
-				text: "Main menu",
-				fill: COLORS.menu,
-				stroke: COLORS.menuBorder,
-				onClick: () => handlers.onMainMenu(),
-			}).getGroup(),
-		);
+		this.group.add(exitButton);
 
 		this.showOnly(this.countdownGroup);
 	}
@@ -295,12 +230,7 @@ export class MasteryScreenView implements MasteryScreenViewPort {
 	}
 
 	updateFields(fields: readonly string[], activeIndex: number): void {
-		this.boxes.forEach((box, index) => {
-			box.text.text(fields[index] ?? "");
-			const active = index === activeIndex;
-			box.rect.stroke(active ? COLORS.boxActive : COLORS.boxBorder);
-			box.rect.strokeWidth(active ? 4 : 2);
-		});
+		this.answerBoxes.update(fields, activeIndex);
 		this.redraw();
 	}
 
@@ -309,70 +239,10 @@ export class MasteryScreenView implements MasteryScreenViewPort {
 		this.redraw();
 	}
 
-	showSummary(summary: MasterySummary): void {
-		this.summaryTitle.text(summary.title);
-		this.summaryCorrect.text(`Correct answers: ${summary.correctCount}`);
-		this.summaryIncorrect.text(`Incorrect answers: ${summary.incorrectCount}`);
-		this.summaryDetail.text(summary.detail);
-		this.showOnly(this.summaryGroup);
-		this.redraw();
-	}
-
-	/** Shows one part of the screen. Exit is offered everywhere except the summary. */
+	/** Shows one part of the screen. */
 	private showOnly(part: Konva.Group): void {
 		this.countdownGroup.visible(part === this.countdownGroup);
 		this.playGroup.visible(part === this.playGroup);
-		this.summaryGroup.visible(part === this.summaryGroup);
-		this.exitButton.visible(part !== this.summaryGroup);
-	}
-
-	/** Draws the top and bottom answer boxes with a fraction bar between them. */
-	private drawAnswerBoxes(handlers: MasteryScreenHandlers): void {
-		const x = (STAGE_WIDTH - BOX_WIDTH) / 2;
-		const barY = BOXES_TOP + BOX_HEIGHT + FRACTION_GAP / 2;
-		this.addBox(x, BOXES_TOP, handlers);
-		this.playGroup.add(
-			new Konva.Line({
-				points: [x, barY, x + BOX_WIDTH, barY],
-				stroke: COLORS.text,
-				strokeWidth: 3,
-				listening: false,
-			}),
-		);
-		this.addBox(x, BOXES_TOP + BOX_HEIGHT + FRACTION_GAP, handlers);
-	}
-
-	private addBox(x: number, y: number, handlers: MasteryScreenHandlers): void {
-		const index = this.boxes.length;
-		const boxGroup = new Konva.Group({ name: `field-${index}` });
-		const rect = new Konva.Rect({
-			x,
-			y,
-			width: BOX_WIDTH,
-			height: BOX_HEIGHT,
-			fill: "white",
-			stroke: COLORS.boxBorder,
-			strokeWidth: 2,
-			cornerRadius: 6,
-		});
-		// The text spans the whole box so it can be centered without measuring.
-		const text = new Konva.Text({
-			x,
-			y,
-			width: BOX_WIDTH,
-			height: BOX_HEIGHT,
-			text: "",
-			fontSize: 30,
-			fontFamily: FONT,
-			fill: COLORS.text,
-			align: "center",
-			verticalAlign: "middle",
-			listening: false,
-		});
-		boxGroup.add(rect, text);
-		boxGroup.on("click tap", () => handlers.onFieldSelected(index));
-		this.playGroup.add(boxGroup);
-		this.boxes.push({ rect, text });
 	}
 
 	private centeredText(

@@ -12,7 +12,6 @@ import { MasteryScreenModel } from "./MasteryScreenModel.ts";
 import type {
 	MasteryScreenHandlers,
 	MasteryScreenViewPort,
-	MasterySummary,
 } from "./MasteryScreenViewPort.ts";
 import type { MasteryProblem } from "./masteryProblems.ts";
 
@@ -26,7 +25,6 @@ class FakeView implements MasteryScreenViewPort {
 	fields: readonly string[] = [];
 	activeIndex = -1;
 	message = "";
-	summary: MasterySummary | undefined;
 
 	private readonly group = new Konva.Group();
 	getGroup(): Konva.Group {
@@ -38,7 +36,6 @@ class FakeView implements MasteryScreenViewPort {
 	showCountdown(secondsLeft: number, rule: string): void {
 		this.countdowns.push(secondsLeft);
 		this.rule = rule;
-		this.summary = undefined;
 	}
 	showProblem(equation: string, problemNumber: number): void {
 		this.equation = equation;
@@ -54,9 +51,6 @@ class FakeView implements MasteryScreenViewPort {
 	}
 	showMessage(message: string): void {
 		this.message = message;
-	}
-	showSummary(summary: MasterySummary): void {
-		this.summary = summary;
 	}
 }
 
@@ -178,7 +172,6 @@ describe("MasteryScreenController playing", () => {
 		expect(view.problemNumber).toBe(2);
 		expect(view.message).toBe(CORRECT_MESSAGE);
 		expect(view.fields).toEqual(["", ""]);
-		expect(view.summary).toBeUndefined();
 		expect(controller.getModel().getCorrectCount()).toBe(1);
 	});
 
@@ -196,7 +189,6 @@ describe("MasteryScreenController playing", () => {
 		handlers.onDigit("1");
 		handlers.onCheck();
 		expect(view.message).toMatch(/whole numbers/);
-		expect(view.summary).toBeUndefined();
 		expect(controller.getModel().getAnsweredCount()).toBe(0);
 	});
 
@@ -204,7 +196,6 @@ describe("MasteryScreenController playing", () => {
 		const { view, handlers } = startPlaying();
 		answer(handlers, "1", "0");
 		expect(view.message).toMatch(/can't be 0/);
-		expect(view.summary).toBeUndefined();
 	});
 });
 
@@ -300,13 +291,12 @@ describe("MasteryScreenController end of game", () => {
 		expect(view.equation).toBe("");
 	});
 
-	test("play again starts a new game from the countdown", () => {
+	test("starting a new game restarts from the countdown", () => {
 		const { controller, view, handlers } = startPlaying();
 		answer(handlers, "1", "2");
 		answer(handlers, "1", "3");
-		handlers.onPlayAgain();
+		controller.startGame();
 
-		expect(view.summary).toBeUndefined();
 		expect(view.score).toBe(0);
 		expect(view.countdowns.at(-1)).toBe(MASTERY_COUNTDOWN_SECONDS);
 		expect(controller.getModel().getAnsweredCount()).toBe(0);
@@ -316,11 +306,5 @@ describe("MasteryScreenController end of game", () => {
 		expect(view.problemNumber).toBe(1);
 	});
 
-	test("main menu goes back to the menu", () => {
-		const { switcher, handlers } = startPlaying();
-		handlers.onExit();
-		handlers.onMainMenu();
-		expect(switcher.switchToScreen).toHaveBeenCalledWith({ type: "menu" });
-	});
 });
 

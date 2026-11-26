@@ -49,8 +49,6 @@ export class MasteryScreenController extends ScreenController {
       onFieldSelected: (index) => this.handleFieldSelected(index),
       onCheck: () => this.handleCheck(),
       onExit: () => this.handleExit(),
-      onPlayAgain: () => this.startGame(),
-      onMainMenu: () => this.screenSwitcher.switchToScreen({ type: "menu" }),
     });
   }
 
