@@ -117,7 +117,7 @@ export class HintModel{
     /**
      * Resets the state for each new Problem. 
      */
-    reset(): void {
+    resetHints(): void {
         this.generalHintShown = false;
         this.specificHintShown = false;
         this.incorrectAttempts = 0;

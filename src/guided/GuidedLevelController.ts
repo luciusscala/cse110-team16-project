@@ -230,11 +230,13 @@ export class GuidedLevelController extends ScreenController {
 
 		progress.completeProblem();
 		if (!progress.isLevelComplete()) {
+			this.hint.resetHints();
 			this.loadQuestion();
 			return;
 		}
 
 		ProgressManager.increaseProgressTo(level.id);
+		this.hint.resetHints();
 		this.leaveLevel();
 	}
 
