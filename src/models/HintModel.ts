@@ -1,5 +1,4 @@
 import { Problem } from "./Problem.ts";
-import { Fraction } from "./Fraction.ts";
 
 export class HintModel{
     
@@ -41,7 +40,7 @@ export class HintModel{
                 "need to be resized before adding. Keep the sizes fixed for " +
                 "your final pizza portion.";
             case 2:
-                return "Is there an simpler way to express your pizza portion? " +
+                return "Is there a simpler way to express your pizza portion? " +
                 "Try increasing the size of the pizza slices by reducing the " +
                 "number of overall slices.";
             case 3:
@@ -61,6 +60,10 @@ export class HintModel{
                 return "Remember pizza slices must be the same size in order " +
                 "to be added together. And remember to simplify your final " +
                 "pizza portion into the biggest slice possible!";
+            case 7:
+                return "Check the slice sizes first. If they are different, " +
+                "find the Least Common Denominator (LCD) before adding or " +
+                "taking away, then simplify your final pizza portion.";
             default:
                 throw new Error("Invalid Level Type");
         }
@@ -78,7 +81,7 @@ export class HintModel{
             case 2:
                 return "Do " + (problem.getAnswer().numerator * problem.getFrac1().denominator / 
                 problem.getAnswer().denominator) + " and " + problem.getFrac1().denominator + 
-                " have a common multiple that we can divide by?"; 
+                " have a common factor that we can divide by?"; 
             case 3:
                 return "Can " + problem.getFrac1().denominator + " be multiplied " +
                 "by a number to get " + problem.getFrac2().denominator + "? " +
@@ -86,7 +89,8 @@ export class HintModel{
                 "biggest slice size possible!";
             case 4:
                 return "Try multiplying the larger pizza size by " + 
-                (problem.getFrac1().denominator/problem.getFrac2().denominator) + 
+                (Math.max(problem.getFrac1().denominator, problem.getFrac2().denominator) /
+                Math.min(problem.getFrac1().denominator, problem.getFrac2().denominator)) + 
                 " to make a smaller pizza slice size. Or try simplifying by " +
                 "dividing out any of the common factors both pizza slice sizes have.";
             case 5:
@@ -98,6 +102,11 @@ export class HintModel{
                 return "Find the Least Common Multiple (LCM) between the " +
                 "pizza slice sizes. What number is needed to get each pizza " +
                 "slice size to that same shared size?";
+            case 7:
+                return "What is the smallest number that both " +
+                problem.getFrac1().denominator + " and " + problem.getFrac2().denominator +
+                " fit into evenly? Resize both pizzas to that many slices, " +
+                "combine them, then make the slices as big as you can.";
             default:
                 throw new Error("Invalid Level Type");
         }
