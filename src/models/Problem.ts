@@ -57,5 +57,5 @@ export class Problem {
     checkAnswer(user: Fraction): boolean{
         return this.answer.isEqual(user);
     }
-    
+
 }

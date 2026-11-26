@@ -4,6 +4,9 @@ import { getLevelById } from "../models/level/levelRepository.ts";
 import type { Level } from "../models/level/LevelTypes.ts";
 import { ScreenController } from "../types.ts";
 import type { ScreenSwitcher } from "../types.ts";
+import { HintModel } from "../models/HintModel.ts";
+import { Problem } from "../models/Problem.ts";
+import { ProblemType } from "../models/ProblemType.ts";
 import { AnswerEntryModel } from "./AnswerEntryModel.ts";
 import { parseStepAnswer } from "./answerParsing.ts";
 import { GuidedSolutionModel } from "./GuidedSolutionModel.ts";
@@ -39,6 +42,7 @@ interface ActiveQuestion {
  */
 export class GuidedLevelController extends ScreenController {
 	private readonly view: GuidedLevelViewPort;
+	private readonly hint: HintModel;
 	private readonly screenSwitcher: ScreenSwitcher;
 
 	private level: Level | undefined;
@@ -56,7 +60,9 @@ export class GuidedLevelController extends ScreenController {
 			onCheck: () => this.handleCheck(),
 			onContinue: () => this.handleContinue(),
 			onBack: () => this.handleBack(),
+			onHintClick: () => this.handleHintRequest(),
 		});
+		this.hint = new HintModel();
 	}
 
 	getView(): GuidedLevelViewPort {
@@ -179,16 +185,19 @@ export class GuidedLevelController extends ScreenController {
 		const { model, entry } = this.requireActive();
 		const step = model.getCurrentStep();
 		if (step === undefined) return;
+		this.view.clearHint();
 
 		const parsed = parseStepAnswer(step, entry.getFields());
 		if (!parsed.ok) {
 			this.view.showFeedback(parsed.message, "tryAgain");
+			this.handleIncorrectAnswer();
 			return;
 		}
 
 		if (!model.submit(parsed.answer)) {
 			// Keep what they typed so a small slip is easy to fix.
 			this.view.showFeedback(TRY_AGAIN_MESSAGE, "tryAgain");
+			this.handleIncorrectAnswer();
 			return;
 		}
 
@@ -232,6 +241,37 @@ export class GuidedLevelController extends ScreenController {
 	private handleBack(): void {
 		this.leaveLevel();
 	}
+
+	/**
+     * Decides if hints will automatically appear when an incorrect
+     * answer is entered. 
+     */
+	private handleIncorrectAnswer(): void {
+        this.hint.addIncorrectAttempt();
+
+        if(this.hint.shouldShowSpecificHint() || 
+            this.hint.shouldShowGeneralHint()
+        ){
+            this.handleHintRequest();
+        }
+    }
+
+    private handleHintRequest(): void {
+		if(!this.active) return;
+
+		const question = this.active.model.getQuestion();;
+        const problem = new Problem(
+            question.levelId,
+            question.frac1,
+            question.frac2,
+            question.operation === "addition" 
+                ? ProblemType.ADDITION
+                : ProblemType.SUBTRACTION,
+        );
+
+        const hint = this.hint.generateHint(problem);
+        this.view.showHint(hint);
+    }
 
 	private leaveLevel(): void {
 		this.level = undefined;

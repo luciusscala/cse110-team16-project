@@ -77,8 +77,8 @@ export class HintModel{
                 ". Did you remember to keep the slice size fixed?";
             case 2:
                 return "Do " + problem.getAnswer().numerator + " and " + 
-                problem.getAnswer().denominator + " have a common multiple that " + 
-                "we can divide by?";
+                problem.getAnswer().denominator + " have a common multiple " +
+                "that we can divide by?";
             case 3:
                 return "Can " + problem.getFrac1().denominator + " be multiplied " +
                 "by a number to get " + problem.getFrac2().denominator + "? " +
