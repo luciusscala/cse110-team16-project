@@ -57,8 +57,8 @@ export class HintModel{
                 "pizza slice size can be multiplied by to reach the same pizza " +
                 "size?";
             case 6:
-                return "Remember pizza slices must be the same size in order " +
-                "to be added together. And remember to simplify your final " +
+                return "Remember pizza slices must be the same size before " +
+                "adding or taking away. And remember to simplify your final " +
                 "pizza portion into the biggest slice possible!";
             case 7:
                 return "Check the slice sizes first. If they are different, " +
@@ -88,6 +88,11 @@ export class HintModel{
                 "Remember to combine your final pizza portion into the " +
                 "biggest slice size possible!";
             case 4:
+                if (problem.getFrac1().denominator === problem.getFrac2().denominator) {
+                    return "These slices are already the same size, so just work " +
+                    "with the top numbers, " + problem.getFrac1().numerator + " and " +
+                    problem.getFrac2().numerator + ". The bottom number stays the same.";
+                }
                 return "Try multiplying the larger pizza size by " + 
                 (Math.max(problem.getFrac1().denominator, problem.getFrac2().denominator) /
                 Math.min(problem.getFrac1().denominator, problem.getFrac2().denominator)) + 

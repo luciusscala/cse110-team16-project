@@ -2,13 +2,14 @@ import { beforeEach, describe, expect, test, vi } from "vitest";
 import Konva from "konva";
 import { LevelSelectScreenController } from "./LevelSelectScreenController.ts";
 import { LevelSelectScreenView } from "./LevelSelectScreenView.ts";
+import { LevelSelectScreenModel } from "./LevelSelectScreenModel.ts";
 import { ProgressManager } from "../../persistence/ProgressManager.ts";
 import { getAllLevels } from "../../models/level/levelRepository.ts";
 import type { ScreenSwitcher } from "../../types.ts";
 
-function makeController() {
+function makeController(model?: LevelSelectScreenModel) {
 	const switcher: ScreenSwitcher = { switchToScreen: vi.fn() };
-	const controller = new LevelSelectScreenController(switcher);
+	const controller = new LevelSelectScreenController(switcher, model);
 	return { controller, switcher };
 }
 
@@ -65,9 +66,11 @@ describe("LevelSelectScreenController", () => {
 	});
 
 	test("an unlocked level without a screen yet does not open", () => {
-		const unplayable = getAllLevels().find((l) => !l.guided)!;
+		// Every real level is guided now, so mark one as not guided to test the guard.
+		const levels = getAllLevels().map((l) => (l.id === 2 ? { ...l, guided: false } : l));
+		const unplayable = levels[1];
 		ProgressManager.updateProgress(unplayable.id - 1);
-		const { controller, switcher } = makeController();
+		const { controller, switcher } = makeController(new LevelSelectScreenModel(levels));
 		controller.show();
 		clickTile(controller, unplayable.id);
 		expect(switcher.switchToScreen).not.toHaveBeenCalled();

@@ -99,7 +99,7 @@ export const LEVELS: readonly Level[] = Object.freeze([
     ],
   ),
 
-  level(4, "Take Some Away", "Add and take away slices.", "mixed", false, [
+  level(4, "Take Some Away", "Add and take away slices.", "mixed", true, [
     // Easier to harder: same denominators, then simplifying, then matching denominators.
     [f(4, 5), SUB, f(1, 5), f(3, 5)],
     [f(5, 6), SUB, f(1, 6), f(2, 3)], // 4/6
@@ -108,7 +108,7 @@ export const LEVELS: readonly Level[] = Object.freeze([
     [f(5, 6), SUB, f(1, 3), f(1, 2)], // 5/6 - 2/6 = 3/6
   ]),
 
-  level(5, "Different Slices", "Add slices of different sizes.", ADD, false, [
+  level(5, "Different Slices", "Add slices of different sizes.", ADD, true, [
     // Easier to harder: common denominator gets bigger. The last one's common
     // denominator (12) is smaller than 4 x 6, which is the trickiest case.
     [f(1, 2), ADD, f(1, 3), f(5, 6)], // 3/6 + 2/6
@@ -123,7 +123,7 @@ export const LEVELS: readonly Level[] = Object.freeze([
     "Put It All Together",
     "Add and take away different slices, then make it simpler.",
     "mixed",
-    false,
+    true,
     [
       // Easier to harder: subtraction with no simplifying first, then answers
       // that need simplifying, ending with subtraction that needs simplifying.
@@ -135,7 +135,7 @@ export const LEVELS: readonly Level[] = Object.freeze([
     ],
   ),
 
-  level(7, "Final Challenge", "Use everything you learned!", "mixed", false, [
+  level(7, "Final Challenge", "Use everything you learned!", "mixed", true, [
     // Easier to harder: same denominators, then multiples, then unrelated.
     [f(5, 12), ADD, f(1, 12), f(1, 2)], // 6/12
     [f(7, 10), SUB, f(3, 10), f(2, 5)], // 4/10

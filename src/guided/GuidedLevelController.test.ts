@@ -1,6 +1,7 @@
 import Konva from "konva";
 import { beforeEach, describe, expect, test, vi } from "vitest";
 import { ProgressManager } from "../persistence/ProgressManager.ts";
+import { getAllLevels } from "../models/level/levelRepository.ts";
 import type { Screen, ScreenSwitcher } from "../types.ts";
 import { GuidedLevelController } from "./GuidedLevelController.ts";
 import type {
@@ -136,9 +137,9 @@ describe("GuidedLevelController", () => {
 			expect(h.view.header).toBeUndefined();
 		});
 
-		test("refuses a level that is not guided", () => {
-			expect(h.controller.startLevel(4)).toBe(false);
-			expect(h.view.header).toBeUndefined();
+		test.each(getAllLevels().map((level) => level.id))("starts campaign level %i", (levelId) => {
+			expect(h.controller.startLevel(levelId)).toBe(true);
+			expect(h.view.header?.questionNumber).toBe(1);
 		});
 
 		test("restarting a level goes back to its first question", () => {
@@ -385,7 +386,7 @@ describe("GuidedLevelController", () => {
 	});
 
 	describe("every guided level can be played to the end", () => {
-		test.each([1, 2, 3])("level %i", (levelId) => {
+		test.each([1, 2, 3, 4, 5, 6])("level %i", (levelId) => {
 			const spy = vi.spyOn(ProgressManager, "increaseProgressTo");
 			h.controller.startLevel(levelId);
 			const total = h.view.header!.questionCount;
@@ -397,6 +398,23 @@ describe("GuidedLevelController", () => {
 				h.handlers.onContinue();
 			}
 			expect(spy).toHaveBeenCalledWith(levelId);
+			expect(h.screens).toEqual([{ type: "menu" }]);
+		});
+
+		test("finishing the last level shows the congratulations screen", () => {
+			h.controller.startLevel(7);
+			const total = h.view.header!.questionCount;
+			for (let question = 0; question < total; question++) {
+				solveCurrentQuestion(h);
+				h.handlers.onContinue();
+			}
+			expect(ProgressManager.getUserProgress()).toBe(7);
+			expect(h.screens).toEqual([{ type: "campaignComplete" }]);
+		});
+
+		test("going back from the last level still returns to the menu", () => {
+			h.controller.startLevel(7);
+			h.handlers.onBack();
 			expect(h.screens).toEqual([{ type: "menu" }]);
 		});
 	});

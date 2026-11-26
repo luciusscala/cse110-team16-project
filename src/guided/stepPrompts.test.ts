@@ -36,6 +36,11 @@ describe("getStepPrompt", () => {
 		expect(prompt.inputs).toEqual([{ kind: "number", label: "LCD =" }]);
 	});
 
+	test("the LCD tip matches the operation", () => {
+		expect(getStepPrompt("lcd", addition).tip).toContain("To add slices");
+		expect(getStepPrompt("lcd", subtraction).tip).toContain("To take away slices");
+	});
+
 	test("the matching step names the LCD and asks for both fractions", () => {
 		const prompt = getStepPrompt("scaleNumerators", addition);
 		expect(prompt.instruction).toContain("6 on the bottom");

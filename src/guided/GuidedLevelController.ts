@@ -1,9 +1,10 @@
+import { NUM_LVLS } from "../constants.ts";
 import { ProgressManager } from "../persistence/ProgressManager.ts";
 import { CurrentLevelProgressModel } from "../models/CurrentLevelProgressModel.ts";
 import { getLevelById } from "../models/level/levelRepository.ts";
 import type { Level } from "../models/level/LevelTypes.ts";
 import { ScreenController } from "../types.ts";
-import type { ScreenSwitcher } from "../types.ts";
+import type { Screen, ScreenSwitcher } from "../types.ts";
 import { HintModel } from "../models/HintModel.ts";
 import { Problem } from "../models/Problem.ts";
 import { ProblemType } from "../models/ProblemType.ts";
@@ -38,7 +39,7 @@ interface ActiveQuestion {
  * boxes for the current step and checks them. A wrong answer just asks the
  * player to try again, since the tutorial text already explains the step.
  * Finishing the last question saves the level as completed and returns to
- * the menu.
+ * the menu, or to the congratulations screen after the final level.
  */
 export class GuidedLevelController extends ScreenController {
 	private readonly view: GuidedLevelViewPort;
@@ -239,7 +240,7 @@ export class GuidedLevelController extends ScreenController {
 		}
 
 		ProgressManager.increaseProgressTo(level.id);
-		this.leaveLevel();
+		this.leaveLevel(level.id === NUM_LVLS ? { type: "campaignComplete" } : { type: "menu" });
 	}
 
 	private handleBack(): void {
@@ -277,12 +278,12 @@ export class GuidedLevelController extends ScreenController {
         this.view.showHint(hint);
     }
 
-	private leaveLevel(): void {
+	private leaveLevel(next: Screen = { type: "menu" }): void {
 		this.level = undefined;
 		this.levelProgress = undefined;
 		this.active = undefined;
 		this.questionComplete = false;
-		this.screenSwitcher.switchToScreen({ type: "menu" });
+		this.screenSwitcher.switchToScreen(next);
 	}
 
 	/** True while the player is on a question that still needs answers. */
