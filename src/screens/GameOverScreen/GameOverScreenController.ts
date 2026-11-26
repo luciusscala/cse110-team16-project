@@ -23,10 +23,16 @@ export class GameOverScreenController extends ScreenController {
         });
     }
 
-    /** Called once when a minigame ends. */
+    /**
+     * Called once when a minigame ends. A Mastery game ended before any answer
+     * (Exit at once) is shown but not recorded, so it can't fill the leaderboard with zeros.
+     */
     showResults(gameId: MinigameId, score: number, summary?: MasterySummary): void {
         this.currentMode = gameId;
-        const leaderboard = this.highScores.recordScore(score, gameId);
+        const answered = summary === undefined || summary.correctCount + summary.incorrectCount > 0;
+        const leaderboard = answered
+            ? this.highScores.recordScore(score, gameId)
+            : this.highScores.getLeaderboard(gameId);
         
         this.view.showResults(
             gameId,
