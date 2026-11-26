@@ -142,8 +142,8 @@ describe("check general hint level generation", () => {
         const hintModel = new HintModel();
         const hint = hintModel.generateGeneralHint(problem);
 
-        expect(hint).toBe("Remember pizza slices must be the same size in order " +
-                "to be added together. And remember to simplify your final " +
+        expect(hint).toBe("Remember pizza slices must be the same size before " +
+                "adding or taking away. And remember to simplify your final " +
                 "pizza portion into the biggest slice possible!");
     });
 
@@ -189,11 +189,12 @@ describe("check specific hint level generation", () => {
     });
 
     test("generates a level 4 specific hint", () => {
-        const problem = createProblem(4);
+        const problem = new Problem(4, new Fraction(1, 2), new Fraction(1, 8),
+            ProblemType.ADDITION);
         const hintModel = new HintModel();
         const hint = hintModel.generateSpecificHint(problem);
 
-        expect(hint).toBe("Try multiplying the larger pizza size by 1 to " +
+        expect(hint).toBe("Try multiplying the larger pizza size by 4 to " +
                 "make a smaller pizza slice size. Or try simplifying by dividing " +
                 "out any of the common factors both pizza slice sizes have.");
     });
@@ -228,12 +229,13 @@ describe("check specific hint level generation", () => {
 });
 
 describe("hints for the later levels", () => {
-    test("the level 4 specific hint divides the larger slice count by the smaller", () => {
-        const problem = new Problem(4, new Fraction(1, 2), new Fraction(1, 8),
-            ProblemType.ADDITION);
+    test("the level 4 specific hint for same-size slices points at the top numbers", () => {
+        const problem = new Problem(4, new Fraction(4, 5), new Fraction(1, 5),
+            ProblemType.SUBTRACTION);
         const hint = new HintModel().generateSpecificHint(problem);
 
-        expect(hint).toContain("larger pizza size by 4 to");
+        expect(hint).toBe("These slices are already the same size, so just work " +
+            "with the top numbers, 4 and 1. The bottom number stays the same.");
     });
 
     test("level 7 has a general and a specific hint", () => {
