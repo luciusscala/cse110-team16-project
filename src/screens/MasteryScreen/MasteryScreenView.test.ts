@@ -11,8 +11,6 @@ function makeHandlers(): MasteryScreenHandlers {
 		onFieldSelected: vi.fn(),
 		onCheck: vi.fn(),
 		onExit: vi.fn(),
-		onPlayAgain: vi.fn(),
-		onMainMenu: vi.fn(),
 	};
 }
 
@@ -65,24 +63,6 @@ describe("MasteryScreenView", () => {
 		expect(find<Konva.Group>("field-1").findOne<Konva.Text>("Text")!.text()).toBe("12");
 	});
 
-	test("the summary shows the results and hides Exit", () => {
-		const { view, find } = makeView();
-		view.showSummary({
-			title: "Game over!",
-			correctCount: 7,
-			incorrectCount: 1,
-			detail: "1/2 + 1/3 = 5/6. You answered 2/5.",
-		});
-
-		expect(find<Konva.Text>("summaryTitle").text()).toBe("Game over!");
-		expect(find<Konva.Text>("summaryCorrect").text()).toBe("Correct answers: 7");
-		expect(find<Konva.Text>("summaryIncorrect").text()).toBe("Incorrect answers: 1");
-		expect(find<Konva.Text>("summaryDetail").text()).toMatch(/You answered 2\/5/);
-		expect(find("summary").visible()).toBe(true);
-		expect(find("play").visible()).toBe(false);
-		expect(find("exitButton").visible()).toBe(false);
-	});
-
 	test("buttons and keys call the handlers", () => {
 		const { handlers, find } = makeView();
 		find("digit-7").fire("click");
@@ -90,16 +70,12 @@ describe("MasteryScreenView", () => {
 		find("check").fire("click");
 		find("field-1").fire("click");
 		find("exitButton").fire("click");
-		find("playAgainButton").fire("click");
-		find("mainMenuButton").fire("click");
 
 		expect(handlers.onDigit).toHaveBeenCalledWith("7");
 		expect(handlers.onBackspace).toHaveBeenCalled();
 		expect(handlers.onCheck).toHaveBeenCalled();
 		expect(handlers.onFieldSelected).toHaveBeenCalledWith(1);
 		expect(handlers.onExit).toHaveBeenCalled();
-		expect(handlers.onPlayAgain).toHaveBeenCalled();
-		expect(handlers.onMainMenu).toHaveBeenCalled();
 	});
 
 	test("backdrop is located behind all other onscreen elements and is the right color", () => {
