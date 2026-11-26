@@ -269,11 +269,11 @@ describe("GuidedLevelView", () => {
 			expect(handlers.onContinue).toHaveBeenCalledOnce();
 		});
 
-		test("the button says Next question, or Finish level on the last question", () => {
+		test("the button says Next Question, or Finish Level on the last question", () => {
 			view.showQuestionComplete("1/3 + 1/3 = 2/3", false);
-			expect(textsIn(named("continue"))).toEqual(["Next question"]);
+			expect(textsIn(named("continue"))).toEqual(["Next Question"]);
 			view.showQuestionComplete("1/3 + 1/3 = 2/3", true);
-			expect(textsIn(named("continue"))).toEqual(["Finish level"]);
+			expect(textsIn(named("continue"))).toEqual(["Finish Level"]);
 		});
 
 		test("the next question brings the pad back", () => {

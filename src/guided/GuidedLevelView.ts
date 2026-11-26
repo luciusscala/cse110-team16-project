@@ -318,7 +318,7 @@ export class GuidedLevelView implements GuidedLevelViewPort {
 	showQuestionComplete(summary: string, isLastQuestion: boolean): void {
 		this.feedbackText.text(`${summary}  Great job!`);
 		this.feedbackText.fill(COLORS.correct);
-		this.continueLabel.text(isLastQuestion ? "Finish level" : "Next Question");
+		this.continueLabel.text(isLastQuestion ? "Finish Level" : "Next Question");
 		this.setAnswering(false);
 		this.redraw();
 	}

@@ -168,7 +168,7 @@ describe("SpeedModeScreenView", () => {
         expect(backdrop).toBeDefined();
 
         expect(backdrop.zIndex()).toBe(0);
-        expect(backdrop.fill()).toBe("#e0abff");
+        expect(backdrop.fill()).toBe("#edc0e8");
     });
 
     test("key backdrop is behind the keypad", () => {
