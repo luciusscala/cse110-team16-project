@@ -102,7 +102,7 @@ describe("check general hint level generation", () => {
         const hintModel = new HintModel();
         const hint = hintModel.generateGeneralHint(problem);
 
-        expect(hint).toBe("Is there an simpler way to express your pizza portion? " +
+        expect(hint).toBe("Is there a simpler way to express your pizza portion? " +
                 "Try increasing the size of the pizza slices by reducing the " +
                 "number of overall slices.");
     });
@@ -148,7 +148,7 @@ describe("check general hint level generation", () => {
     });
 
     test("generates an invalid level general hint", () => {
-        const problem = createProblem(7);
+        const problem = createProblem(8);
         const hintModel = new HintModel();
 
         expect(() => hintModel.generateGeneralHint(problem))
@@ -174,7 +174,7 @@ describe("check specific hint level generation", () => {
         const hintModel = new HintModel();
         const hint = hintModel.generateSpecificHint(problem);
 
-        expect(hint).toBe("Do 2 and 1 have a common multiple that we " +
+        expect(hint).toBe("Do 2 and 1 have a common factor that we " +
                 "can divide by?");
     });
 
@@ -219,10 +219,30 @@ describe("check specific hint level generation", () => {
     });
 
     test("generates invalid level specific hint", () => {
-        const problem = createProblem(7);
+        const problem = createProblem(8);
         const hintModel = new HintModel();
 
         expect(() => hintModel.generateSpecificHint(problem))
             .toThrow("Invalid Level Type");
+    });
+});
+
+describe("hints for the later levels", () => {
+    test("the level 4 specific hint divides the larger slice count by the smaller", () => {
+        const problem = new Problem(4, new Fraction(1, 2), new Fraction(1, 8),
+            ProblemType.ADDITION);
+        const hint = new HintModel().generateSpecificHint(problem);
+
+        expect(hint).toContain("larger pizza size by 4 to");
+    });
+
+    test("level 7 has a general and a specific hint", () => {
+        const problem = new Problem(7, new Fraction(2, 3), new Fraction(1, 5),
+            ProblemType.ADDITION);
+        const hintModel = new HintModel();
+
+        expect(hintModel.generateGeneralHint(problem)).toContain("Least Common Denominator");
+        expect(hintModel.generateSpecificHint(problem))
+            .toContain("smallest number that both 3 and 5 fit into evenly");
     });
 });

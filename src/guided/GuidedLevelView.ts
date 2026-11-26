@@ -77,6 +77,8 @@ const COLORS = {
 	stepTodo: "#aaaaaa",
 	tipFill: "#fff7d6",
 	tipBorder: "#e6d58a",
+	hintFill: "#fdecea",
+	hintPanelBorder: "#e8a3a1",
 };
 
 // The tip panel under the step title
@@ -84,6 +86,9 @@ const TIP_TOP = 166;
 const TIP_WIDTH = 680;
 const TIP_HEIGHT = 56;
 const TIP_PADDING = 10;
+
+// The hint panel covers the tip panel, so it can never sit on the answer boxes.
+const HINT_FONT_SIZE = 15;
 
 // Answer boxes
 const BOX_WIDTH = 70;
@@ -130,7 +135,8 @@ export class GuidedLevelView implements GuidedLevelViewPort {
 	private readonly answerKeys: Konva.Group;
 	private readonly continueButton: Konva.Group;
 	private readonly continueLabel: Konva.Text;
-	private hintText: Konva.Text;
+	private readonly hintPanel = new Konva.Group({ name: "hintPanel", visible: false, listening: false });
+	private readonly hintText: Konva.Text;
 	private boxes: AnswerBox[] = [];
 
 	constructor(handlers: GuidedLevelHandlers) {
@@ -157,7 +163,7 @@ export class GuidedLevelView implements GuidedLevelViewPort {
 			}).getGroup(),
 		);
 
-		this.hintButton = new Button({
+		const hintButton = new Button({
 			name: "hint",
 			x: STAGE_WIDTH - 90 - 12,
 			y: 10,
@@ -169,19 +175,33 @@ export class GuidedLevelView implements GuidedLevelViewPort {
 			fontSize: 18,
 			onClick: () => this.handlers.onHintClick(),
 		});
-		this.group.add(this.hintButton.getGroup());
+		this.group.add(hintButton.getGroup());
 
+		const panelLeft = (STAGE_WIDTH - TIP_WIDTH) / 2;
+		this.hintPanel.add(
+			new Konva.Rect({
+				x: panelLeft,
+				y: TIP_TOP,
+				width: TIP_WIDTH,
+				height: TIP_HEIGHT,
+				fill: COLORS.hintFill,
+				stroke: COLORS.hintPanelBorder,
+				strokeWidth: 2,
+				cornerRadius: 10,
+			}),
+		);
 		this.hintText = new Konva.Text({
-            x: (STAGE_WIDTH - 160) * 3/4,
-            y: 260,
-            width: 300, 
-            text: "",
-            fontSize: 20,
-            fontFamily: FONT,
-            fill: COLORS.text,
+			x: panelLeft + TIP_PADDING,
+			width: TIP_WIDTH - TIP_PADDING * 2,
+			text: "",
+			fontSize: HINT_FONT_SIZE,
+			lineHeight: 1.2,
+			fontFamily: FONT,
+			fill: COLORS.text,
 			align: "center",
-        });
-		this.group.add(this.hintText);
+		});
+		this.hintPanel.add(this.hintText);
+		this.group.add(this.hintPanel);
 
 		this.answerKeys = KeypadBuilder.buildAnswerKeys({
 			keySize: PAD_KEY,
@@ -303,17 +323,20 @@ export class GuidedLevelView implements GuidedLevelViewPort {
 		this.redraw();
 	}
 
-	/** Displays the hint for the problem. */
-    showHint(hint: string): void {
-        this.hintText.text(hint);
+	/** Shows the hint in a panel over the tip, centered vertically in it. */
+	showHint(hint: string): void {
+		this.hintText.text(`Hint: ${hint}`);
+		this.hintText.y(TIP_TOP + (TIP_HEIGHT - this.hintText.height()) / 2);
+		this.hintPanel.visible(true);
 		this.redraw();
-    }
+	}
 
-    /** Clears the hint for the next problem. */
-    clearHint(): void {
-        this.hintText.text("");
+	/** Hides the hint panel, so the tip shows again. */
+	clearHint(): void {
+		this.hintText.text("");
+		this.hintPanel.visible(false);
 		this.redraw();
-    }
+	}
 
 	showQuestionComplete(summary: string, isLastQuestion: boolean): void {
 		this.feedbackText.text(`${summary}  Great job!`);

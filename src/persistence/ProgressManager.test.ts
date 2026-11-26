@@ -112,3 +112,12 @@ test("increaseProgressTo input is not a whole number", () => {
     
     ProgressManager.updateProgress(0);
 });
+
+test.each(["not json", '"three"', "{}", "null"])(
+    "getUserProgress returns 0 for corrupt saved data %s",
+    (saved) => {
+        localStorage.setItem("campaignProgress", saved);
+        expect(ProgressManager.getUserProgress()).toBe(0);
+        localStorage.clear();
+    },
+);

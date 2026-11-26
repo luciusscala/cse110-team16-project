@@ -3,6 +3,10 @@ import { beforeEach, describe, expect, test, vi } from "vitest";
 import { GuidedLevelView } from "./GuidedLevelView.ts";
 import type { GuidedLevelHandlers } from "./GuidedLevelView.ts";
 import type { StepPrompt } from "./stepPrompts.ts";
+import { getAllLevels } from "../models/level/levelRepository.ts";
+import { HintModel } from "../models/HintModel.ts";
+import { Problem } from "../models/Problem.ts";
+import { ProblemType } from "../models/ProblemType.ts";
 
 const FRACTION_PROMPT: StepPrompt = {
 	title: "Put the slices together",
@@ -34,6 +38,7 @@ function makeHandlers() {
 		onCheck: vi.fn(),
 		onContinue: vi.fn(),
 		onBack: vi.fn(),
+		onHintClick: vi.fn(),
 	} satisfies GuidedLevelHandlers;
 }
 
@@ -286,6 +291,62 @@ describe("GuidedLevelView", () => {
 			});
 			expect(named("check").isVisible()).toBe(true);
 			expect(named("continue").isVisible()).toBe(false);
+		});
+	});
+
+	describe("hints", () => {
+		const hintPanel = () => named("hintPanel");
+		const panelRect = () => hintPanel().findOne<Konva.Rect>("Rect")!;
+		const hintText = () => hintPanel().findOne<Konva.Text>("Text")!;
+
+		test("the Hint button sends its action", () => {
+			click("hint");
+			expect(handlers.onHintClick).toHaveBeenCalledOnce();
+		});
+
+		test("starts hidden, shows the hint, and hides again when cleared", () => {
+			view.show();
+			expect(hintPanel().isVisible()).toBe(false);
+			view.showHint("Count the slices.");
+			expect(hintPanel().isVisible()).toBe(true);
+			expect(hintText().text()).toBe("Hint: Count the slices.");
+			view.clearHint();
+			expect(hintPanel().isVisible()).toBe(false);
+		});
+
+		test.each([
+			["a number", NUMBER_PROMPT],
+			["a fraction", FRACTION_PROMPT],
+			["two fractions", TWO_FRACTIONS_PROMPT],
+		])("never covers the answer boxes of %s step", (_, prompt) => {
+			view.showStep(prompt, ["Step"], 0);
+			view.showHint("A long hint. ".repeat(12));
+			const panelBottom = panelRect().y() + panelRect().height();
+			const boxes = group.find<Konva.Group>((node: Konva.Node) => node.name().startsWith("field-"));
+			expect(boxes.length).toBeGreaterThan(0);
+			for (const box of boxes) {
+				expect(panelBottom).toBeLessThan(box.findOne<Konva.Rect>("Rect")!.y());
+			}
+		});
+
+		test("every hint in the playable levels fits inside the panel", () => {
+			for (const level of getAllLevels().filter((l) => l.guided)) {
+				for (const question of level.questions) {
+					const problem = new Problem(
+						level.id,
+						question.frac1,
+						question.frac2,
+						question.operation === "addition" ? ProblemType.ADDITION : ProblemType.SUBTRACTION,
+					);
+					const hints = new HintModel();
+					for (const hint of [hints.generateGeneralHint(problem), hints.generateSpecificHint(problem)]) {
+						view.showHint(hint);
+						expect(hintText().y()).toBeGreaterThanOrEqual(panelRect().y());
+						expect(hintText().y() + hintText().height())
+							.toBeLessThanOrEqual(panelRect().y() + panelRect().height());
+					}
+				}
+			}
 		});
 	});
 });

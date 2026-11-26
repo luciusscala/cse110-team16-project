@@ -12,14 +12,13 @@ export class ProgressManager {
      */
     static getUserProgress(): number {
         const saved_string = localStorage.getItem(PROGRESS_KEY);
-    
-        if (saved_string !== null)
-        {
-            const loadedData: number = JSON.parse(saved_string);
-            return loadedData;
-        }
-        else {
-            // If save data is invalid, default to no progress
+        if (saved_string === null) return 0;
+
+        // If save data is missing, corrupt, or not a number, default to no progress
+        try {
+            const loadedData: unknown = JSON.parse(saved_string);
+            return typeof loadedData === "number" && Number.isFinite(loadedData) ? loadedData : 0;
+        } catch {
             return 0;
         }
     }
