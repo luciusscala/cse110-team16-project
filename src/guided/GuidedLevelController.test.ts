@@ -460,8 +460,27 @@ describe("GuidedLevelController", () => {
 			expect(h.view.hint).toContain("Try adding the number of pizza");
 		});
 
-		
-		
+		test("leaving a level mid-way does not carry wrong answers into the next level", () => {
+			h.controller.startLevel(2);
+			enter(h, 10);
+			enter(h, 11);
+			enter(h, 12);
+			expect(h.view.hint).toBeDefined();
+			h.handlers.onBack();
+
+			h.controller.startLevel(1);
+			enter(h, 10);
+			enter(h, 11);
+			expect(h.view.hint).toBeUndefined();
+		});
+
+		test("the hint button does nothing once the question is finished", () => {
+			h.controller.startLevel(1);
+			solveRemainingSteps(h);
+			h.handlers.onHintClick();
+
+			expect(h.view.hint).toBeUndefined();
+		});
 	});
 });
 

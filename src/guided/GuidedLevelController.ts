@@ -91,6 +91,9 @@ export class GuidedLevelController extends ScreenController {
 		const question = level.questions[progress.getProblemsCompleted()];
 
 		this.questionComplete = false;
+		// Hints belong to one question, so a new question starts without any.
+		this.hint.resetHints();
+		this.view.clearHint();
 		const model = new GuidedSolutionModel(question);
 		this.active = {
 			model,
@@ -230,13 +233,11 @@ export class GuidedLevelController extends ScreenController {
 
 		progress.completeProblem();
 		if (!progress.isLevelComplete()) {
-			this.hint.resetHints();
 			this.loadQuestion();
 			return;
 		}
 
 		ProgressManager.increaseProgressTo(level.id);
-		this.hint.resetHints();
 		this.leaveLevel();
 	}
 
@@ -259,9 +260,9 @@ export class GuidedLevelController extends ScreenController {
     }
 
     private handleHintRequest(): void {
-		if(!this.active) return;
+		if (!this.isAcceptingAnswers()) return;
 
-		const question = this.active.model.getQuestion();;
+		const question = this.requireActive().model.getQuestion();
         const problem = new Problem(
             question.levelId,
             question.frac1,
