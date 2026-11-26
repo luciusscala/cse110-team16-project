@@ -70,11 +70,12 @@ describe("LevelSelectScreenModel", () => {
 	});
 
 	test("canOpen needs the level to be both unlocked and playable", () => {
-		const model = new LevelSelectScreenModel();
-		const firstUnplayable = getAllLevels().find((l) => !l.guided)!;
+		// Every real level is guided now, so mark one as not guided to test the guard.
+		const levels = getAllLevels().map((l) => (l.id === 3 ? { ...l, guided: false } : l));
+		const model = new LevelSelectScreenModel(levels);
 		expect(model.canOpen(1, 0)).toBe(true);
 		expect(model.canOpen(2, 0)).toBe(false); // locked
-		expect(model.canOpen(firstUnplayable.id, NUM_LVLS)).toBe(false); // no screen yet
+		expect(model.canOpen(3, NUM_LVLS)).toBe(false); // no screen yet
 	});
 
 	test("works from the level list it is given", () => {

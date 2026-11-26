@@ -1,6 +1,7 @@
 import Konva from "konva";
 import { beforeEach, describe, expect, test, vi } from "vitest";
 import { ProgressManager } from "../persistence/ProgressManager.ts";
+import { getAllLevels } from "../models/level/levelRepository.ts";
 import type { Screen, ScreenSwitcher } from "../types.ts";
 import { GuidedLevelController } from "./GuidedLevelController.ts";
 import type {
@@ -136,9 +137,9 @@ describe("GuidedLevelController", () => {
 			expect(h.view.header).toBeUndefined();
 		});
 
-		test("refuses a level that is not guided", () => {
-			expect(h.controller.startLevel(4)).toBe(false);
-			expect(h.view.header).toBeUndefined();
+		test.each(getAllLevels().map((level) => level.id))("starts campaign level %i", (levelId) => {
+			expect(h.controller.startLevel(levelId)).toBe(true);
+			expect(h.view.header?.questionNumber).toBe(1);
 		});
 
 		test("restarting a level goes back to its first question", () => {

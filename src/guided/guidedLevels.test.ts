@@ -33,8 +33,8 @@ function solveCompletely(question: Question): GuidedSolutionModel {
 }
 
 describe("guided campaign levels", () => {
-	test("the early levels are the guided ones", () => {
-		expect(guidedLevels.map((level) => level.id)).toEqual([1, 2, 3]);
+	test("every campaign level is guided", () => {
+		expect(guidedLevels.map((level) => level.id)).toEqual([1, 2, 3, 4, 5, 6, 7]);
 	});
 
 	test.each(guidedLevels.flatMap((level) => level.questions))(
@@ -125,6 +125,50 @@ describe("guided campaign levels", () => {
 			expect(model.submit({ step: "lcd", lcd: 4 })).toBe(true);
 			expect(model.getCurrentStep()).toBe("scaleNumerators");
 			expect(model.getAttemptCount("lcd")).toBe(3);
+		});
+	});
+
+	/** The steps each question in a level asks for, in question order. */
+	const stepsIn = (levelId: number) =>
+		getLevelById(levelId)!.questions.map((question) =>
+			new GuidedSolutionModel(question).getSteps(),
+		);
+	const SAME = ["combine"];
+	const SAME_SIMPLIFY = ["combine", "simplify"];
+	const MATCH = ["lcd", "scaleNumerators", "combine"];
+	const MATCH_SIMPLIFY = ["lcd", "scaleNumerators", "combine", "simplify"];
+
+	describe("level 4 (take some away)", () => {
+		test("starts with same-size slices, then needs matching", () => {
+			expect(stepsIn(4)).toEqual([SAME, SAME_SIMPLIFY, MATCH, MATCH, MATCH_SIMPLIFY]);
+		});
+
+		test("is mostly taking away", () => {
+			const operations = getLevelById(4)!.questions.map((q) => q.operation);
+			expect(operations.filter((op) => op === "subtraction")).toHaveLength(4);
+		});
+	});
+
+	describe("level 5 (different slices)", () => {
+		test("asks for the LCD on every question and never needs simplifying", () => {
+			expect(stepsIn(5)).toEqual([MATCH, MATCH, MATCH, MATCH, MATCH]);
+		});
+
+		test("ends with an LCD smaller than the two denominators multiplied", () => {
+			const last = getLevelById(5)!.questions[4]; // 1/4 + 1/6
+			expect(computeExpectedSolution(last).lcd).toBe(12);
+		});
+	});
+
+	describe("level 6 (put it all together)", () => {
+		test("asks for the LCD every time, and simplifies the last three", () => {
+			expect(stepsIn(6)).toEqual([MATCH, MATCH, MATCH_SIMPLIFY, MATCH_SIMPLIFY, MATCH_SIMPLIFY]);
+		});
+	});
+
+	describe("level 7 (final challenge)", () => {
+		test("mixes same-size slices with slices that need matching", () => {
+			expect(stepsIn(7)).toEqual([SAME_SIMPLIFY, SAME_SIMPLIFY, MATCH_SIMPLIFY, MATCH, MATCH]);
 		});
 	});
 });

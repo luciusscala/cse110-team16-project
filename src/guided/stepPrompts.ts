@@ -54,13 +54,15 @@ export function getStepPrompt(
 	const [first, second] = solution.scaled;
 
 	switch (step) {
-		case "lcd":
+		case "lcd": {
+			const action = question.operation === "addition" ? "add" : "take away";
 			return {
 				title: "Find the lowest common denominator",
-				tip: `To add slices, they must be the same size. Count up by ${question.frac1.denominator}s and by ${question.frac2.denominator}s. The first number in both lists is the LCD.`,
+				tip: `To ${action} slices, they must be the same size. Count up by ${question.frac1.denominator}s and by ${question.frac2.denominator}s. The first number in both lists is the LCD.`,
 				instruction: `What is the smallest number that both ${question.frac1.denominator} and ${question.frac2.denominator} fit into evenly?`,
 				inputs: [{ kind: "number", label: "LCD =" }],
 			};
+		}
 		case "scaleNumerators":
 			return {
 				title: "Make the slices match",
