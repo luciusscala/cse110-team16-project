@@ -3,7 +3,12 @@ import type { ScreenSwitcher } from "../../types.ts";
 import { SpeedModeScreenView } from "./SpeedModeScreenView.ts"
 import { SpeedModeScreenModel } from "./SpeedModeScreenModel.ts"
 import { SPEED_MODE_TIME_LIMIT, SPEED_COUNTDOWN_SECONDS } from "../../constants.ts";
-import { LOWEST_TERMS_RULE } from "../MasteryScreen/MasteryScreenController.ts";
+import { LOWEST_TERMS_RULE, CORRECT_MESSAGE } from "../MasteryScreen/MasteryScreenController.ts";
+import { masteryAnswer } from "../MasteryScreen/masteryProblems.ts";
+import { AnswerEntryModel } from "../../guided/AnswerEntryModel.ts";
+import { parseStepAnswer } from "../../guided/answerParsing.ts";
+import { formatEquation } from "../../guided/stepPrompts.ts";
+import { getFoodTiles, getFoodOperator } from "../../visuals/FoodVisualState.ts";
 
 /**
  * Controls the functionality of the Speed Challenge Minigame by manipulating the view and model.
@@ -11,6 +16,8 @@ import { LOWEST_TERMS_RULE } from "../MasteryScreen/MasteryScreenController.ts";
 export class SpeedModeScreenController extends ScreenController {
     private view: SpeedModeScreenView;
     private model: SpeedModeScreenModel;
+    /** The answer is one fraction, typed in two boxes: top, then bottom. */
+    private entry = new AnswerEntryModel(2);
     private screenSwitcher: ScreenSwitcher;
 
     private gameEnded = false;
@@ -30,6 +37,7 @@ export class SpeedModeScreenController extends ScreenController {
             onKeyClick: (digit) => this.handleKeyClick(digit),
             onCheckClick: () => this.handleCheckClick(),
             onBackspaceClick: () => this.handleBackspaceClick(),
+            onFieldSelected: (index) => this.handleFieldSelected(index),
         });
         this.model = new SpeedModeScreenModel();
     }
@@ -59,6 +67,7 @@ export class SpeedModeScreenController extends ScreenController {
         if (secondsLeft <= 0) {
             this.countdownTimer = null;
             this.view.hideCountdown();
+            this.showCurrentProblem();
             this.startTimer();
             return;
         }
@@ -132,23 +141,60 @@ export class SpeedModeScreenController extends ScreenController {
         });
     }
 
-    private handleKeyClick(digit: String): void {
-        console.log(`Clicked digit ${digit}`);
+    /** Input only counts once the countdown is over and until the game ends. */
+    private isPlaying(): boolean {
+        return !this.gameEnded && !this.isCountingDown();
+    }
+
+    private showCurrentProblem(): void {
+        const problem = this.model.getCurrentProblem();
+        this.entry.clear();
+        this.view.showProblem(formatEquation(problem));
+        this.view.showFoodTiles(getFoodTiles(problem, "original"), getFoodOperator(problem.operation));
+        this.refreshFields();
+    }
+
+    private refreshFields(): void {
+        this.view.updateFields(this.entry.getFields(), this.entry.getActiveIndex());
+    }
+
+    private handleKeyClick(digit: string): void {
+        if (!this.isPlaying()) return;
+        this.entry.typeDigit(digit);
+        this.refreshFields();
     }
 
     private handleBackspaceClick(): void {
-        console.log(`Clicked backspace`);
+        if (!this.isPlaying()) return;
+        this.entry.backspace();
+        this.refreshFields();
+    }
+
+    private handleFieldSelected(index: number): void {
+        if (!this.isPlaying()) return;
+        this.entry.selectField(index);
+        this.refreshFields();
     }
 
     /**
-     * Decides whether or not to increase score.
-     * Because no check has been implemented yet, it always does.
+     * Checks the typed answer. A correct answer scores a point; a wrong one shows the right
+     * answer. Either way the next problem follows.
      */
     private handleCheckClick(): void {
-        if (this.isCountingDown()) return;
-        // Needs proper checking functionality added; currently exists to test score increase
-        this.model.incrementScore();
+        if (!this.isPlaying()) return;
+
+        const parsed = parseStepAnswer("simplify", this.entry.getFields());
+        if (!parsed.ok) {
+            this.view.showMessage(parsed.message);
+            return;
+        }
+        if (parsed.answer.step !== "simplify") return;
+
+        const expected = masteryAnswer(this.model.getCurrentProblem());
+        const correct = this.model.submit(parsed.answer.result);
         this.view.updateScore(this.model.getScore());
+        this.showCurrentProblem();
+        this.view.showMessage(correct ? CORRECT_MESSAGE : `Answer: ${expected}`);
     }
 
     /**

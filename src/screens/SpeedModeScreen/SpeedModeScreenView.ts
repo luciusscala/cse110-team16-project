@@ -3,6 +3,7 @@ import type { View } from "../../types.ts";
 import { STAGE_WIDTH } from "../../constants.ts";
 import { Button } from "../../components/Button.ts";
 import { KeypadBuilder } from "../../components/Keypad.ts";
+import { FractionAnswerBoxes } from "../../components/FractionAnswerBoxes.ts";
 import { SPEED_MODE_TIME_LIMIT } from "../../constants.ts";
 import { FractionFoodVisual } from "../../visuals/FractionFoodVisual.ts";
 import type { FoodTile } from "../../visuals/FoodVisualState.ts";
@@ -70,14 +71,22 @@ const FOOD_FIRST_X = 76;
 const FOOD_SECOND_X = 210;
 const FOOD_CENTER_Y = 205;
 
+// Problem text and answer boxes
+const EQUATION_Y = 60;
+const EQUATION_SIZE = 36;
+const BOXES_TOP = 180;
+const MESSAGE_Y = 300;
+const MESSAGE_SIZE = 20;
+
 /**
  * Ensures that the appropriate handler functions are passed into SpeedModeScreenView's convstructor
  */
 export interface SpeedModeScreenHandlers {
     onEndGameClick: () => void;
-    onKeyClick: () => void;
+    onKeyClick: (digit: string) => void;
     onCheckClick: () => void;
     onBackspaceClick: () => void;
+    onFieldSelected: (index: number) => void;
 }
 
 /**
@@ -89,6 +98,9 @@ export class SpeedModeScreenView implements View {
     private countdownGroup: Konva.Group;
     private countdownRule: Konva.Text;
     private countdownNumber: Konva.Text;
+    private equationText: Konva.Text;
+    private messageText: Konva.Text;
+    private answerBoxes: FractionAnswerBoxes;
 
     /**
      * Creates the screen as it is when starting the Speech Challenge minigame.
@@ -205,7 +217,7 @@ export class SpeedModeScreenView implements View {
             distFromTop: PAD_TOP,
             actionWidth: ACTION_WIDTH,
             actionHeight: ACTION_HEIGHT,
-            onKeyClick: (digit: String) => handlers.onKeyClick(digit),
+            onKeyClick: (digit: string) => handlers.onKeyClick(digit),
             onBackspaceClick: () => handlers.onBackspaceClick(),
             onCheckClick: () => handlers.onCheckClick(),
             keyColor: "#b44c10",
@@ -213,6 +225,11 @@ export class SpeedModeScreenView implements View {
         });
 
         this.group.add(this.answerKeys);
+
+        this.equationText = this.centeredText("", EQUATION_Y, EQUATION_SIZE, "bold", "equation");
+        this.messageText = this.centeredText("", MESSAGE_Y, MESSAGE_SIZE, "normal", "message");
+        this.answerBoxes = new FractionAnswerBoxes(BOXES_TOP, handlers.onFieldSelected);
+        this.group.add(this.equationText, this.messageText, this.answerBoxes.getGroup());
 
         // Countdown covers the play area before the timer starts; End stays on top of it
         this.countdownGroup = new Konva.Group({ name: "countdown", visible: false });
@@ -235,6 +252,24 @@ export class SpeedModeScreenView implements View {
         this.group.add(this.remainingTimeDisplay);
         this.group.add(scoreText);
         this.group.add(this.scoreDisplay);
+    }
+
+    /** Shows the problem as an equation, and clears any message from the last one. */
+    showProblem(equation: string): void {
+        this.equationText.text(`${equation} =`);
+        this.messageText.text("");
+        this.group.getLayer()?.draw();
+    }
+
+    /** Shows what has been typed into the answer boxes and which box is active. */
+    updateFields(fields: readonly string[], activeIndex: number): void {
+        this.answerBoxes.update(fields, activeIndex);
+        this.group.getLayer()?.draw();
+    }
+
+    showMessage(message: string): void {
+        this.messageText.text(message);
+        this.group.getLayer()?.draw();
     }
 
     /** Displays the existing problem fractions at fixed horizontal positions. */
