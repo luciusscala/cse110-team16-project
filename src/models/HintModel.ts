@@ -76,9 +76,9 @@ export class HintModel{
                 problem.getFrac1().numerator + " and " + problem.getFrac2().numerator + 
                 ". Did you remember to keep the slice size fixed?";
             case 2:
-                return "Do " + problem.getAnswer().numerator + " and " + 
-                problem.getAnswer().denominator + " have a common multiple that " + 
-                "we can divide by?";
+                return "Do " + (problem.getAnswer().numerator * problem.getFrac1().denominator / 
+                problem.getAnswer().denominator) + " and " + problem.getFrac1().denominator + 
+                " have a common multiple that we can divide by?"; 
             case 3:
                 return "Can " + problem.getFrac1().denominator + " be multiplied " +
                 "by a number to get " + problem.getFrac2().denominator + "? " +
@@ -117,7 +117,7 @@ export class HintModel{
     /**
      * Resets the state for each new Problem. 
      */
-    reset(): void {
+    resetHints(): void {
         this.generalHintShown = false;
         this.specificHintShown = false;
         this.incorrectAttempts = 0;

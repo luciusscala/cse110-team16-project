@@ -27,6 +27,7 @@ export interface GuidedLevelHandlers {
 	onCheck(): void;
 	onContinue(): void;
 	onBack(): void;
+	onHintClick(): void;
 }
 
 /**
@@ -48,6 +49,8 @@ export interface GuidedLevelViewPort extends View {
 	showFeedback(message: string, tone: FeedbackTone): void;
 	/** Shows the finished question and the button to move on. */
 	showQuestionComplete(summary: string, isLastQuestion: boolean): void;
+	showHint(hint: string): void;
+	clearHint(): void;
 }
 
 /** Builds the view for a controller, handing it the player's actions. */
@@ -63,6 +66,8 @@ const COLORS = {
 	buttonBorder: "#1f6e36",
 	back: "#777777",
 	backBorder: "#555555",
+	hint: "#d9534f",
+	hintBorder: "#a83a36",
 	boxBorder: "#999999",
 	boxActive: "#3b7dd8",
 	correct: "#1f8a3d",
@@ -125,6 +130,7 @@ export class GuidedLevelView implements GuidedLevelViewPort {
 	private readonly answerKeys: Konva.Group;
 	private readonly continueButton: Konva.Group;
 	private readonly continueLabel: Konva.Text;
+	private hintText: Konva.Text;
 	private boxes: AnswerBox[] = [];
 
 	constructor(handlers: GuidedLevelHandlers) {
@@ -151,6 +157,32 @@ export class GuidedLevelView implements GuidedLevelViewPort {
 			}).getGroup(),
 		);
 
+		this.hintButton = new Button({
+			name: "hint",
+			x: STAGE_WIDTH - 90 - 12,
+			y: 10,
+			width: 90,
+			height: 34,
+			text: "Hint?",
+			fill: COLORS.hint,
+			stroke: COLORS.hintBorder,
+			fontSize: 18,
+			onClick: () => this.handlers.onHintClick(),
+		});
+		this.group.add(this.hintButton.getGroup());
+
+		this.hintText = new Konva.Text({
+            x: (STAGE_WIDTH - 160) * 3/4,
+            y: 260,
+            width: 300, 
+            text: "",
+            fontSize: 20,
+            fontFamily: FONT,
+            fill: COLORS.text,
+			align: "center",
+        });
+		this.group.add(this.hintText);
+
 		this.answerKeys = KeypadBuilder.buildAnswerKeys({
 			keySize: PAD_KEY,
 			keySpacing: PAD_SPACING,
@@ -170,7 +202,7 @@ export class GuidedLevelView implements GuidedLevelViewPort {
 			y: PAD_TOP,
 			width: ACTION_WIDTH,
 			height: ACTION_HEIGHT,
-			text: "Next question",
+			text: "Next Question",
 			fill: COLORS.button,
 			stroke: COLORS.buttonBorder,
 			fontSize: 22,
@@ -271,10 +303,22 @@ export class GuidedLevelView implements GuidedLevelViewPort {
 		this.redraw();
 	}
 
+	/** Displays the hint for the problem. */
+    showHint(hint: string): void {
+        this.hintText.text(hint);
+		this.redraw();
+    }
+
+    /** Clears the hint for the next problem. */
+    clearHint(): void {
+        this.hintText.text("");
+		this.redraw();
+    }
+
 	showQuestionComplete(summary: string, isLastQuestion: boolean): void {
 		this.feedbackText.text(`${summary}  Great job!`);
 		this.feedbackText.fill(COLORS.correct);
-		this.continueLabel.text(isLastQuestion ? "Finish level" : "Next question");
+		this.continueLabel.text(isLastQuestion ? "Finish Level" : "Next Question");
 		this.setAnswering(false);
 		this.redraw();
 	}

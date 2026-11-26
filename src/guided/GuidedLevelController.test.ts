@@ -22,6 +22,8 @@ class FakeView implements GuidedLevelViewPort {
 	feedback: { message: string; tone: FeedbackTone } | undefined;
 	completion: { summary: string; isLastQuestion: boolean } | undefined;
 	questionsShown = 0;
+	hint: string | undefined;
+	hintCleared: false;
 
 	private readonly group = new Konva.Group();
 	getGroup(): Konva.Group {
@@ -51,6 +53,13 @@ class FakeView implements GuidedLevelViewPort {
 	}
 	showQuestionComplete(summary: string, isLastQuestion: boolean): void {
 		this.completion = { summary, isLastQuestion };
+	}
+	showHint(hint: string): void {
+		this.hint = hint;
+	}
+	clearHint(): void {
+		this.hint = undefined;
+		this.hintCleared = true;
 	}
 }
 
@@ -392,6 +401,67 @@ describe("GuidedLevelController", () => {
 			expect(spy).toHaveBeenCalledWith(levelId);
 			expect(h.screens).toEqual([{ type: "menu" }]);
 		});
+	});
+
+	describe("hints", () => {
+		test("hint button displays hint", () => {
+			h.controller.startLevel(1);
+			h.handlers.onHintClick();
+
+			expect(h.view.hint).toBeDefined();
+		});
+
+		test("check button clears hint", () => {
+			h.controller.startLevel(1);
+			h.view.showHint("test hint");
+			h.handlers.onCheck();
+
+			expect(h.view.hint).toBeUndefined();
+			expect(h.view.hintCleared).toBe(true);
+		});
+		
+		test("3 incorrect answers triggers automatic general hint", () => {
+			h.controller.startLevel(1);
+
+			enter(h, 10);
+			expect(h.view.feedback?.tone).toBe("tryAgain");
+			expect(h.view.hint).toBeUndefined();
+
+			enter(h, 11);
+			expect(h.view.feedback?.tone).toBe("tryAgain");
+			expect(h.view.hint).toBeUndefined();
+
+			enter(h, 12);
+			expect(h.view.feedback?.tone).toBe("tryAgain");
+			expect(h.view.hint).toContain("Remember that pizza slices of");
+		});
+		
+		test("5 incorrect answers triggers automatic specific hint", () => {
+			h.controller.startLevel(1);
+
+			enter(h, 10);
+			expect(h.view.feedback?.tone).toBe("tryAgain");
+			expect(h.view.hint).toBeUndefined();
+
+			enter(h, 11);
+			expect(h.view.feedback?.tone).toBe("tryAgain");
+			expect(h.view.hint).toBeUndefined();
+
+			enter(h, 12);
+			expect(h.view.feedback?.tone).toBe("tryAgain");
+			expect(h.view.hint).toContain("Remember that pizza slices of");
+
+			enter(h, 13);
+			expect(h.view.feedback?.tone).toBe("tryAgain");
+			expect(h.view.hint).toBeUndefined();
+
+			enter(h, 14);
+			expect(h.view.feedback?.tone).toBe("tryAgain");
+			expect(h.view.hint).toContain("Try adding the number of pizza");
+		});
+
+		
+		
 	});
 });
 
